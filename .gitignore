@@ -22,6 +22,9 @@ release/
 *.local.json
 spike-session.json
 
+# Site vitrine
+server/
+
 # IDE
 .idea/
 .vscode/

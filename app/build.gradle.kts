@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
-val keystorePath: String? = System.getenv("RING_KEYSTORE_PATH")
+val keystorePath: String? = System.getenv("SIGNING_STORE_FILE")
 
 android {
     namespace = "dev.ringalarmwidget"
@@ -13,7 +13,7 @@ android {
         applicationId = "dev.ringalarmwidget"
         minSdk = 26
         targetSdk = 36
-        versionCode = (System.getenv("RING_VERSION_CODE") ?: "1").toInt()
+        versionCode = (System.getenv("APP_VERSION_CODE") ?: "1").toInt()
         versionName = "1.0.0"
     }
 
@@ -21,9 +21,9 @@ android {
         if (keystorePath != null) {
             create("release") {
                 storeFile = file(keystorePath)
-                storePassword = System.getenv("RING_KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("RING_KEY_ALIAS")
-                keyPassword = System.getenv("RING_KEY_PASSWORD")
+                storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+                keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
             }
         }
     }
