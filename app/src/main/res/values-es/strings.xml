@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_disclaimer">Sin afiliación con Ring ni Amazon.</string>
+
+    <string name="onboarding_title">Iniciar sesión</string>
+    <string name="onboarding_subtitle">Tus credenciales se envían directamente al proveedor de la alarma. Esta aplicación no tiene servidor propio.</string>
+    <string name="onboarding_email_label">Correo electrónico</string>
+    <string name="onboarding_password_label">Contraseña</string>
+    <string name="onboarding_password_notice">Tu contraseña nunca se guarda. Solo se conserva un token renovable, cifrado en este dispositivo.</string>
+    <string name="onboarding_submit">Continuar</string>
+
+    <string name="twofactor_title">Código de verificación</string>
+    <string name="twofactor_sent_sms">Hemos enviado un código por SMS al %1$s.</string>
+    <string name="twofactor_sent_sms_unknown">Hemos enviado un código por SMS.</string>
+    <string name="twofactor_sent_email">Hemos enviado un código a tu correo electrónico.</string>
+    <string name="twofactor_sent_authenticator">Abre tu aplicación de autenticación para obtener el código.</string>
+    <string name="twofactor_sent_unknown">Se ha enviado un código de verificación.</string>
+    <string name="twofactor_code_label">Código de 6 dígitos</string>
+    <string name="twofactor_submit">Verificar</string>
+    <plurals name="twofactor_resend_in">
+        <item quantity="one">Puedes pedir un código nuevo en %d segundo.</item>
+        <item quantity="many">Puedes pedir un código nuevo en %d de segundos.</item>
+        <item quantity="other">Puedes pedir un código nuevo en %d segundos.</item>
+    </plurals>
+
+    <string name="error_invalid_credentials">Correo electrónico o contraseña incorrectos.</string>
+    <string name="error_invalid_code">Este código no es válido o ha caducado.</string>
+    <plurals name="error_rate_limited">
+        <item quantity="one">Demasiados intentos. Inténtalo de nuevo en %d segundo.</item>
+        <item quantity="many">Demasiados intentos. Inténtalo de nuevo en %d de segundos.</item>
+        <item quantity="other">Demasiados intentos. Inténtalo de nuevo en %d segundos.</item>
+    </plurals>
+    <string name="error_rate_limited_unknown">Demasiados intentos. Espera unos minutos antes de volver a intentarlo.</string>
+    <string name="error_unreachable">No se puede conectar con el servicio. Comprueba tu conexión.</string>
+    <string name="error_signed_out">Tu sesión ha caducado. Vuelve a iniciar sesión.</string>
+
+    <string name="mode_disarmed">Desarmada</string>
+    <string name="mode_home">En casa</string>
+    <string name="mode_away">Fuera</string>
+
+    <string name="widget_state_pending">Cambiando…</string>
+    <plurals name="panel_transition_remaining">
+        <item quantity="one">En %d segundo</item>
+        <item quantity="many">En %d de segundos</item>
+        <item quantity="other">En %d segundos</item>
+    </plurals>
+    <string name="widget_state_unknown">Desconocido</string>
+    <string name="widget_refresh">Actualizar</string>
+    <string name="widget_description">Cambie el modo de su alarma desde la pantalla de inicio.</string>
+    <string name="widget_status_description">Vea el modo de su alarma de un vistazo, en un cuadrado.</string>
+    <string name="widget_label_modes">Modos de la alarma</string>
+    <string name="widget_label_status">Estado de la alarma</string>
+    <string name="widget_sign_in">Toque para iniciar sesión</string>
+    <string name="widget_failed">Intento fallido</string>
+
+    <string name="disarm_confirm_title">¿Desarmar la alarma?</string>
+    <string name="disarm_confirm_subtitle">Confirma tu identidad para desarmar.</string>
+    <string name="disarm_confirm_cancel">Cancelar</string>
+    <string name="action_sign_out">Cerrar sesión</string>
+    <string name="error_no_location">Esta cuenta no tiene ninguna ubicación.</string>
+    <string name="error_no_panel">No se encontró ningún panel de alarma en esta ubicación.</string>
+    <string name="error_mode_rejected">El panel rechazó el cambio. Puede que un sensor necesite omitirse desde la aplicación oficial.</string>
+    <string name="error_timeout">El panel no respondió a tiempo.</string>
+    <string name="panel_current_state">Estado actual</string>
+    <string name="settings_title">Ajustes</string>
+    <string name="action_close">Cerrar</string>
+    <string name="settings_confirm_disarm_title">Confirmar antes de desarmar</string>
+    <string name="settings_confirm_disarm_subtitle">Pedir tu huella, tu cara o el bloqueo de pantalla antes de apagar la alarma.</string>
+    <string name="settings_confirm_disarm_unavailable">Este dispositivo no tiene bloqueo de pantalla, así que no se puede pedir nada.</string>
+    <string name="settings_appearance_title">Apariencia</string>
+    <string name="settings_appearance_app">Aplicación</string>
+    <string name="settings_appearance_widget">Widget de la pantalla de inicio</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Oscuro</string>
+    <string name="settings_language_title">Idioma</string>
+    <string name="language_system">Idioma del sistema</string>
+</resources>

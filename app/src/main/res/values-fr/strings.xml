@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_disclaimer">Non affilié à Ring ni à Amazon.</string>
+
+    <string name="onboarding_title">Connexion</string>
+    <string name="onboarding_subtitle">Vos identifiants sont transmis directement au fournisseur de l\'alarme. Cette application n\'a aucun serveur.</string>
+    <string name="onboarding_email_label">Adresse e-mail</string>
+    <string name="onboarding_password_label">Mot de passe</string>
+    <string name="onboarding_password_notice">Votre mot de passe n\'est jamais enregistré. Seul un jeton renouvelable est conservé, chiffré sur cet appareil.</string>
+    <string name="onboarding_submit">Continuer</string>
+
+    <string name="twofactor_title">Code de vérification</string>
+    <string name="twofactor_sent_sms">Un code a été envoyé par SMS au %1$s.</string>
+    <string name="twofactor_sent_sms_unknown">Un code a été envoyé par SMS.</string>
+    <string name="twofactor_sent_email">Un code a été envoyé à votre adresse e-mail.</string>
+    <string name="twofactor_sent_authenticator">Ouvrez votre application d\'authentification pour récupérer le code.</string>
+    <string name="twofactor_sent_unknown">Un code de vérification a été envoyé.</string>
+    <string name="twofactor_code_label">Code à 6 chiffres</string>
+    <string name="twofactor_submit">Vérifier</string>
+    <plurals name="twofactor_resend_in">
+        <item quantity="one">Nouveau code possible dans %d seconde.</item>
+        <item quantity="many">Nouveau code possible dans %d de secondes.</item>
+        <item quantity="other">Nouveau code possible dans %d secondes.</item>
+    </plurals>
+
+    <string name="error_invalid_credentials">Adresse e-mail ou mot de passe incorrect.</string>
+    <string name="error_invalid_code">Ce code est invalide ou a expiré.</string>
+    <plurals name="error_rate_limited">
+        <item quantity="one">Trop de tentatives. Réessayez dans %d seconde.</item>
+        <item quantity="many">Trop de tentatives. Réessayez dans %d de secondes.</item>
+        <item quantity="other">Trop de tentatives. Réessayez dans %d secondes.</item>
+    </plurals>
+    <string name="error_rate_limited_unknown">Trop de tentatives. Patientez quelques minutes avant de réessayer.</string>
+    <string name="error_unreachable">Service injoignable. Vérifiez votre connexion.</string>
+    <string name="error_signed_out">Votre session a expiré. Reconnectez-vous.</string>
+
+    <string name="mode_disarmed">Désarmé</string>
+    <string name="mode_home">Domicile</string>
+    <string name="mode_away">Absent</string>
+
+    <string name="widget_state_pending">Changement…</string>
+    <plurals name="panel_transition_remaining">
+        <item quantity="one">Dans %d seconde</item>
+        <item quantity="many">Dans %d de secondes</item>
+        <item quantity="other">Dans %d secondes</item>
+    </plurals>
+    <string name="widget_state_unknown">Inconnu</string>
+    <string name="widget_refresh">Actualiser</string>
+    <string name="widget_description">Changez le mode de votre alarme depuis l\'écran d\'accueil.</string>
+    <string name="widget_status_description">Voyez le mode de votre alarme d\'un coup d\'œil, en un carré.</string>
+    <string name="widget_label_modes">Modes de l\'alarme</string>
+    <string name="widget_label_status">État de l\'alarme</string>
+    <string name="widget_sign_in">Touchez pour vous connecter</string>
+    <string name="widget_failed">Échec de la tentative</string>
+
+    <string name="disarm_confirm_title">Désarmer l\'alarme ?</string>
+    <string name="disarm_confirm_subtitle">Confirmez votre identité pour désarmer.</string>
+    <string name="disarm_confirm_cancel">Annuler</string>
+    <string name="action_sign_out">Se déconnecter</string>
+    <string name="error_no_location">Aucune location sur ce compte.</string>
+    <string name="error_no_panel">Aucun panneau d\'alarme trouvé à cette location.</string>
+    <string name="error_mode_rejected">Le panneau a refusé le changement. Un capteur demande peut-être un bypass depuis l\'application officielle.</string>
+    <string name="error_timeout">Le panneau n\'a pas répondu à temps.</string>
+    <string name="panel_current_state">État actuel</string>
+    <string name="settings_title">Réglages</string>
+    <string name="action_close">Fermer</string>
+    <string name="settings_confirm_disarm_title">Confirmer avant de désarmer</string>
+    <string name="settings_confirm_disarm_subtitle">Demander votre empreinte, votre visage ou le code de l\'écran avant de couper l\'alarme.</string>
+    <string name="settings_confirm_disarm_unavailable">Aucun verrouillage d\'écran n\'est configuré sur cet appareil, rien ne peut donc être demandé.</string>
+    <string name="settings_appearance_title">Apparence</string>
+    <string name="settings_appearance_app">Application</string>
+    <string name="settings_appearance_widget">Widget de l\'écran d\'accueil</string>
+    <string name="theme_system">Système</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_dark">Sombre</string>
+    <string name="settings_language_title">Langue</string>
+    <string name="language_system">Langue du système</string>
+</resources>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_disclaimer">Nicht mit Ring oder Amazon verbunden.</string>
+
+    <string name="onboarding_title">Anmelden</string>
+    <string name="onboarding_subtitle">Ihre Zugangsdaten gehen direkt an den Alarmanbieter. Diese App hat keinen eigenen Server.</string>
+    <string name="onboarding_email_label">E-Mail-Adresse</string>
+    <string name="onboarding_password_label">Passwort</string>
+    <string name="onboarding_password_notice">Ihr Passwort wird nie gespeichert. Nur ein erneuerbares Token bleibt erhalten, verschlüsselt auf diesem Gerät.</string>
+    <string name="onboarding_submit">Weiter</string>
+
+    <string name="twofactor_title">Bestätigungscode</string>
+    <string name="twofactor_sent_sms">Wir haben einen Code per SMS an %1$s gesendet.</string>
+    <string name="twofactor_sent_sms_unknown">Wir haben einen Code per SMS gesendet.</string>
+    <string name="twofactor_sent_email">Wir haben einen Code an Ihre E-Mail-Adresse gesendet.</string>
+    <string name="twofactor_sent_authenticator">Öffnen Sie Ihre Authenticator-App, um den Code abzurufen.</string>
+    <string name="twofactor_sent_unknown">Ein Bestätigungscode wurde gesendet.</string>
+    <string name="twofactor_code_label">6-stelliger Code</string>
+    <string name="twofactor_submit">Bestätigen</string>
+    <plurals name="twofactor_resend_in">
+        <item quantity="one">Sie können in %d Sekunde einen neuen Code anfordern.</item>
+        <item quantity="other">Sie können in %d Sekunden einen neuen Code anfordern.</item>
+    </plurals>
+
+    <string name="error_invalid_credentials">Falsche E-Mail-Adresse oder falsches Passwort.</string>
+    <string name="error_invalid_code">Dieser Code ist ungültig oder abgelaufen.</string>
+    <plurals name="error_rate_limited">
+        <item quantity="one">Zu viele Versuche. Bitte in %d Sekunde erneut versuchen.</item>
+        <item quantity="other">Zu viele Versuche. Bitte in %d Sekunden erneut versuchen.</item>
+    </plurals>
+    <string name="error_rate_limited_unknown">Zu viele Versuche. Warten Sie einige Minuten, bevor Sie es erneut versuchen.</string>
+    <string name="error_unreachable">Dienst nicht erreichbar. Prüfen Sie Ihre Verbindung.</string>
+    <string name="error_signed_out">Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.</string>
+
+    <string name="mode_disarmed">Deaktiviert</string>
+    <string name="mode_home">Zu Hause</string>
+    <string name="mode_away">Abwesend</string>
+
+    <string name="widget_state_pending">Wird geändert…</string>
+    <plurals name="panel_transition_remaining">
+        <item quantity="one">In %d Sekunde</item>
+        <item quantity="other">In %d Sekunden</item>
+    </plurals>
+    <string name="widget_state_unknown">Unbekannt</string>
+    <string name="widget_refresh">Aktualisieren</string>
+    <string name="widget_description">Ändern Sie den Alarmmodus direkt vom Startbildschirm.</string>
+    <string name="widget_status_description">Sehen Sie den Alarmmodus auf einen Blick, in einem Quadrat.</string>
+    <string name="widget_label_modes">Alarmmodi</string>
+    <string name="widget_label_status">Alarmstatus</string>
+    <string name="widget_sign_in">Zum Anmelden tippen</string>
+    <string name="widget_failed">Versuch fehlgeschlagen</string>
+
+    <string name="disarm_confirm_title">Alarm deaktivieren?</string>
+    <string name="disarm_confirm_subtitle">Bestätigen Sie Ihre Identität, um zu deaktivieren.</string>
+    <string name="disarm_confirm_cancel">Abbrechen</string>
+    <string name="action_sign_out">Abmelden</string>
+    <string name="error_no_location">Dieses Konto hat keinen Standort.</string>
+    <string name="error_no_panel">An diesem Standort wurde keine Alarmzentrale gefunden.</string>
+    <string name="error_mode_rejected">Die Zentrale hat die Änderung abgelehnt. Ein Sensor muss möglicherweise in der offiziellen App überbrückt werden.</string>
+    <string name="error_timeout">Die Zentrale hat nicht rechtzeitig geantwortet.</string>
+    <string name="panel_current_state">Aktueller Status</string>
+    <string name="settings_title">Einstellungen</string>
+    <string name="action_close">Schließen</string>
+    <string name="settings_confirm_disarm_title">Vor dem Deaktivieren bestätigen</string>
+    <string name="settings_confirm_disarm_subtitle">Vor dem Ausschalten der Alarmanlage nach Fingerabdruck, Gesicht oder Displaysperre fragen.</string>
+    <string name="settings_confirm_disarm_unavailable">Auf diesem Gerät ist keine Displaysperre eingerichtet, es kann also nichts abgefragt werden.</string>
+    <string name="settings_appearance_title">Darstellung</string>
+    <string name="settings_appearance_app">Anwendung</string>
+    <string name="settings_appearance_widget">Startbildschirm-Widget</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="settings_language_title">Sprache</string>
+    <string name="language_system">Systemsprache</string>
+</resources>

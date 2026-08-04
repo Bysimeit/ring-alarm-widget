@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.RingAlarmWidget">
+
+        <activity
+            android:name="dev.ringalarmwidget.ui.MainActivity"
+            android:configChanges="locale|layoutDirection"
+            android:exported="true"
+            android:theme="@style/Theme.RingAlarmWidget">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name="dev.ringalarmwidget.widget.ModeWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_label_modes">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/mode_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name="dev.ringalarmwidget.widget.StatusWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_label_status">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/status_widget_info" />
+        </receiver>
+
+    </application>
+
+</manifest>
