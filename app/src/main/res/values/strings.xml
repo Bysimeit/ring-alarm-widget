@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Ring Alarm Widget</string>
+    <string name="app_disclaimer">Not affiliated with Ring or Amazon.</string>
+
+    <string name="onboarding_title">Sign in</string>
+    <string name="onboarding_subtitle">Your credentials go straight to the alarm provider. This app has no server of its own.</string>
+    <string name="onboarding_email_label">Email address</string>
+    <string name="onboarding_password_label">Password</string>
+    <string name="onboarding_password_notice">Your password is never saved. Only a renewable token is kept, encrypted on this device.</string>
+    <string name="onboarding_submit">Continue</string>
+
+    <string name="twofactor_title">Verification code</string>
+    <string name="twofactor_sent_sms">We sent a code by text message to %1$s.</string>
+    <string name="twofactor_sent_sms_unknown">We sent a code by text message.</string>
+    <string name="twofactor_sent_email">We sent a code to your email address.</string>
+    <string name="twofactor_sent_authenticator">Open your authenticator app to get the code.</string>
+    <string name="twofactor_sent_unknown">A verification code has been sent.</string>
+    <string name="twofactor_code_label">6-digit code</string>
+    <string name="twofactor_submit">Verify</string>
+    <plurals name="twofactor_resend_in">
+        <item quantity="one">You can request a new code in %d second.</item>
+        <item quantity="other">You can request a new code in %d seconds.</item>
+    </plurals>
+
+    <string name="error_invalid_credentials">Wrong email address or password.</string>
+    <string name="error_invalid_code">That code is invalid or has expired.</string>
+    <plurals name="error_rate_limited">
+        <item quantity="one">Too many attempts. Try again in %d second.</item>
+        <item quantity="other">Too many attempts. Try again in %d seconds.</item>
+    </plurals>
+    <string name="error_rate_limited_unknown">Too many attempts. Wait a few minutes before trying again.</string>
+    <string name="error_unreachable">Cannot reach the service. Check your connection.</string>
+    <string name="error_signed_out">Your session has expired. Please sign in again.</string>
+
+    <string name="mode_disarmed">Disarmed</string>
+    <string name="mode_home">Home</string>
+    <string name="mode_away">Away</string>
+
+    <string name="widget_state_pending">Changing…</string>
+    <plurals name="panel_transition_remaining">
+        <item quantity="one">In %d second</item>
+        <item quantity="other">In %d seconds</item>
+    </plurals>
+    <string name="widget_state_unknown">Unknown</string>
+    <string name="widget_refresh">Refresh</string>
+    <string name="widget_description">Switch your alarm mode from the home screen.</string>
+    <string name="widget_status_description">See your alarm mode at a glance, in one square.</string>
+    <string name="widget_label_modes">Alarm modes</string>
+    <string name="widget_label_status">Alarm status</string>
+    <string name="widget_sign_in">Tap to sign in</string>
+    <string name="widget_failed">Attempt failed</string>
+
+    <string name="disarm_confirm_title">Disarm the alarm?</string>
+    <string name="disarm_confirm_subtitle">Confirm your identity to disarm.</string>
+    <string name="disarm_confirm_cancel">Cancel</string>
+    <string name="action_sign_out">Sign out</string>
+    <string name="error_no_location">This account has no location.</string>
+    <string name="error_no_panel">No alarm panel found at this location.</string>
+    <string name="error_mode_rejected">The panel refused the change. A sensor may need bypassing from the official app.</string>
+    <string name="error_timeout">The panel did not answer in time.</string>
+    <string name="panel_current_state">Current state</string>
+    <string name="settings_title">Settings</string>
+    <string name="action_close">Close</string>
+    <string name="settings_confirm_disarm_title">Confirm before disarming</string>
+    <string name="settings_confirm_disarm_subtitle">Ask for your fingerprint, face or screen lock before switching the alarm off.</string>
+    <string name="settings_confirm_disarm_unavailable">This device has no screen lock set up, so nothing can be asked for.</string>
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_appearance_app">Application</string>
+    <string name="settings_appearance_widget">Home screen widget</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_language_title">Language</string>
+    <string name="language_system">System language</string>
+</resources>

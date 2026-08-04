@@ -1,0 +1,146 @@
+name: Build app
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '.idea/**'
+      - '**/*.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'licenses/**'
+  workflow_dispatch:
+    inputs:
+      official:
+        description: 'Publish an official versioned release (otherwise latest build)'
+        type: boolean
+        default: false
+      prerelease:
+        description: 'If official, mark it as a pre-release'
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: app-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4
+
+      - run: chmod +x gradlew
+
+      - run: ./gradlew :core:test :app:lintDebug --no-daemon
+
+  android:
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4
+
+      - id: version
+        run: |
+          value=$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' app/build.gradle.kts)
+          test -n "$value"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+      - env:
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+        run: |
+          printf '%s' "$ANDROID_KEYSTORE" | base64 -d > "$RUNNER_TEMP/release.jks"
+          chmod 600 "$RUNNER_TEMP/release.jks"
+
+      - env:
+          RING_KEYSTORE_PATH: ${{ runner.temp }}/release.jks
+          RING_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          RING_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          RING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          RING_VERSION_CODE: ${{ github.run_number }}
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease --no-daemon
+
+      - run: rm -f "$RUNNER_TEMP/release.jks"
+        if: always()
+
+      - name: Package the signed APK
+        run: |
+          signed=app/build/outputs/apk/release/app-release.apk
+          if [ ! -f "$signed" ]; then
+            echo "No signed APK. Gradle produced:" >&2
+            ls app/build/outputs/apk/release/ >&2
+            echo "Check the ANDROID_KEYSTORE* secrets." >&2
+            exit 1
+          fi
+          cp "$signed" ring-alarm-widget.apk
+          sha256sum ring-alarm-widget.apk > ring-alarm-widget.apk.sha256
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android
+          path: |
+            ring-alarm-widget.apk
+            ring-alarm-widget.apk.sha256
+          if-no-files-found: error
+
+  release:
+    needs: android
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.android.outputs.version }}
+          RUN_NUMBER: ${{ github.run_number }}
+          OFFICIAL: ${{ github.event_name == 'workflow_dispatch' && inputs.official }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        working-directory: dist
+        run: |
+          files=(ring-alarm-widget.apk ring-alarm-widget.apk.sha256)
+          if [ "$OFFICIAL" = "true" ]; then
+            flags=""
+            [ "$PRERELEASE" = "true" ] && flags="--prerelease"
+            gh release create "v$VERSION" "${files[@]}" \
+              --title "Ring Alarm Widget $VERSION" --generate-notes $flags
+          else
+            gh release delete latest --yes --cleanup-tag || true
+            gh release create latest "${files[@]}" \
+              --title "Latest build ($VERSION, build $RUN_NUMBER)" \
+              --notes "" --prerelease
+          fi

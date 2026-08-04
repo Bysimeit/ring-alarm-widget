@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_disclaimer">Niet gelieerd aan Ring of Amazon.</string>
+
+    <string name="onboarding_title">Inloggen</string>
+    <string name="onboarding_subtitle">Je gegevens gaan rechtstreeks naar de alarmaanbieder. Deze app heeft geen eigen server.</string>
+    <string name="onboarding_email_label">E-mailadres</string>
+    <string name="onboarding_password_label">Wachtwoord</string>
+    <string name="onboarding_password_notice">Je wachtwoord wordt nooit opgeslagen. Alleen een vernieuwbaar token blijft bewaard, versleuteld op dit toestel.</string>
+    <string name="onboarding_submit">Doorgaan</string>
+
+    <string name="twofactor_title">Verificatiecode</string>
+    <string name="twofactor_sent_sms">We hebben een code per sms naar %1$s gestuurd.</string>
+    <string name="twofactor_sent_sms_unknown">We hebben een code per sms gestuurd.</string>
+    <string name="twofactor_sent_email">We hebben een code naar je e-mailadres gestuurd.</string>
+    <string name="twofactor_sent_authenticator">Open je authenticator-app om de code op te halen.</string>
+    <string name="twofactor_sent_unknown">Er is een verificatiecode verstuurd.</string>
+    <string name="twofactor_code_label">Code van 6 cijfers</string>
+    <string name="twofactor_submit">Verifiëren</string>
+    <plurals name="twofactor_resend_in">
+        <item quantity="one">Je kunt over %d seconde een nieuwe code aanvragen.</item>
+        <item quantity="other">Je kunt over %d seconden een nieuwe code aanvragen.</item>
+    </plurals>
+
+    <string name="error_invalid_credentials">Onjuist e-mailadres of wachtwoord.</string>
+    <string name="error_invalid_code">Deze code is ongeldig of verlopen.</string>
+    <plurals name="error_rate_limited">
+        <item quantity="one">Te veel pogingen. Probeer het over %d seconde opnieuw.</item>
+        <item quantity="other">Te veel pogingen. Probeer het over %d seconden opnieuw.</item>
+    </plurals>
+    <string name="error_rate_limited_unknown">Te veel pogingen. Wacht een paar minuten voordat je het opnieuw probeert.</string>
+    <string name="error_unreachable">Dienst niet bereikbaar. Controleer je verbinding.</string>
+    <string name="error_signed_out">Je sessie is verlopen. Log opnieuw in.</string>
+
+    <string name="mode_disarmed">Uitgeschakeld</string>
+    <string name="mode_home">Thuis</string>
+    <string name="mode_away">Afwezig</string>
+
+    <string name="widget_state_pending">Bezig met wijzigen…</string>
+    <plurals name="panel_transition_remaining">
+        <item quantity="one">Over %d seconde</item>
+        <item quantity="other">Over %d seconden</item>
+    </plurals>
+    <string name="widget_state_unknown">Onbekend</string>
+    <string name="widget_refresh">Vernieuwen</string>
+    <string name="widget_description">Wijzig de stand van uw alarm vanaf het startscherm.</string>
+    <string name="widget_status_description">Zie de stand van uw alarm in één oogopslag, in één vierkant.</string>
+    <string name="widget_label_modes">Alarmstanden</string>
+    <string name="widget_label_status">Alarmstatus</string>
+    <string name="widget_sign_in">Tik om aan te melden</string>
+    <string name="widget_failed">Poging mislukt</string>
+
+    <string name="disarm_confirm_title">Alarm uitschakelen?</string>
+    <string name="disarm_confirm_subtitle">Bevestig je identiteit om uit te schakelen.</string>
+    <string name="disarm_confirm_cancel">Annuleren</string>
+    <string name="action_sign_out">Uitloggen</string>
+    <string name="error_no_location">Dit account heeft geen locatie.</string>
+    <string name="error_no_panel">Geen alarmpaneel gevonden op deze locatie.</string>
+    <string name="error_mode_rejected">Het paneel weigerde de wijziging. Mogelijk moet een sensor worden overbrugd via de officiële app.</string>
+    <string name="error_timeout">Het paneel antwoordde niet op tijd.</string>
+    <string name="panel_current_state">Huidige status</string>
+    <string name="settings_title">Instellingen</string>
+    <string name="action_close">Sluiten</string>
+    <string name="settings_confirm_disarm_title">Bevestigen voor uitschakelen</string>
+    <string name="settings_confirm_disarm_subtitle">Vraag om je vingerafdruk, gezicht of schermvergrendeling voordat het alarm wordt uitgeschakeld.</string>
+    <string name="settings_confirm_disarm_unavailable">Dit toestel heeft geen schermvergrendeling, dus er kan niets gevraagd worden.</string>
+    <string name="settings_appearance_title">Weergave</string>
+    <string name="settings_appearance_app">App</string>
+    <string name="settings_appearance_widget">Widget op het startscherm</string>
+    <string name="theme_system">Systeem</string>
+    <string name="theme_light">Licht</string>
+    <string name="theme_dark">Donker</string>
+    <string name="settings_language_title">Taal</string>
+    <string name="language_system">Systeemtaal</string>
+</resources>
