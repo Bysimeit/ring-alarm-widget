@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android-3ddc84.svg)]()
 [![Built with](https://img.shields.io/badge/built%20with-Kotlin-7f52ff.svg)]()
-[![Release](https://img.shields.io/badge/release-v1.0.0-3ddc84.svg)](https://github.com/Bysimeit/ring-alarm-widget/releases/latest)
+[![Release](https://img.shields.io/badge/release-v1.0.1-3ddc84.svg)](https://github.com/Bysimeit/ring-alarm-widget/releases/latest)
 
 </div>
 
