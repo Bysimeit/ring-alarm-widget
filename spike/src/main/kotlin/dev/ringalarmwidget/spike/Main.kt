@@ -230,8 +230,12 @@ private fun report(result: PanelResult) {
         PanelResult.NoUsableAsset -> "Aucune base station ni pont Beams sur cette location."
 
         is PanelResult.Rejected ->
-            "Refusé : demandé ${result.requested.wireValue}, observé ${result.observed?.wireValue ?: "inconnu"}. " +
-                "Des capteurs demandent peut-être un bypass."
+            "Refusé : demandé ${result.requested.wireValue}, observé ${result.observed?.wireValue ?: "inconnu"}."
+
+        is PanelResult.BypassRequired -> {
+            val sensors = result.sensors.mapNotNull { it.name }.ifEmpty { listOf("capteur inconnu") }
+            "Bypass requis pour armer en ${result.requested.wireValue} : ${sensors.joinToString(", ")}."
+        }
 
         is PanelResult.TimedOut -> "Délai dépassé à l'étape « ${result.stage} »."
 

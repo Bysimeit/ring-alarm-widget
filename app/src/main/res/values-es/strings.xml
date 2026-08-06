@@ -59,7 +59,7 @@
     <string name="action_sign_out">Cerrar sesión</string>
     <string name="error_no_location">Esta cuenta no tiene ninguna ubicación.</string>
     <string name="error_no_panel">No se encontró ningún panel de alarma en esta ubicación.</string>
-    <string name="error_mode_rejected">El panel rechazó el cambio. Puede que un sensor necesite omitirse desde la aplicación oficial.</string>
+    <string name="error_mode_rejected">El panel rechazó el cambio.</string>
     <string name="error_timeout">El panel no respondió a tiempo.</string>
     <string name="panel_current_state">Estado actual</string>
     <string name="settings_title">Ajustes</string>
@@ -75,4 +75,14 @@
     <string name="theme_dark">Oscuro</string>
     <string name="settings_language_title">Idioma</string>
     <string name="language_system">Idioma del sistema</string>
+    <string name="widget_bypass_question">¿Ignorar sensores abiertos?</string>
+    <string name="widget_bypass_accept">✓</string>
+    <string name="widget_bypass_refuse">✕</string>
+    <string name="widget_bypass_accept_description">Armar de todos modos, ignorando los sensores abiertos</string>
+    <string name="widget_bypass_refuse_description">Cancelar, no armar</string>
+    <string name="widget_bypass_sensors_unknown">Hay un sensor abierto</string>
+    <string name="panel_bypass_title">Hay sensores abiertos</string>
+    <string name="panel_bypass_subtitle">El panel se niega a armar mientras estén abiertos. Armar de todos modos los deja sin vigilancia.</string>
+    <string name="panel_bypass_accept">Armar de todos modos</string>
+    <string name="panel_bypass_refuse">Cancelar</string>
 </resources>

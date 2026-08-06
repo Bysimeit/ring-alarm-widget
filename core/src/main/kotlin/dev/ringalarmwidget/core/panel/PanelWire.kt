@@ -72,10 +72,12 @@ internal const val CHANNEL_MESSAGE = "message"
 internal const val CHANNEL_DATA_UPDATE = "DataUpdate"
 internal const val MSG_DEVICE_LIST = "DeviceInfoDocGetList"
 internal const val MSG_DEVICE_SET = "DeviceInfoSet"
+internal const val MSG_PASSTHRU = "Passthru"
 internal const val DATATYPE_DEVICE_SET = "DeviceInfoSetType"
 internal const val DATATYPE_DEVICE_DOC = "DeviceInfoDocType"
 internal const val DATATYPE_HUB_DISCONNECTION = "HubDisconnectionEventType"
 internal const val COMMAND_SWITCH_MODE = "security-panel.switch-mode"
+internal const val SOUND_BYPASS_REQUIRED = "bypass-required"
 
 internal fun buildSwitchModeBody(
     zid: String,
@@ -124,8 +126,23 @@ internal fun JsonObject.toPanelDevice(assetUuid: String): PanelDevice? {
         name = text("name"),
         mode = AlarmMode.fromWire(text("mode")),
         transitionDelayEndTimestamp = number("transitionDelayEndTimestamp"),
+        faulted = flag("faulted") == true,
     )
 }
+
+internal fun announcesBypassRequired(message: IncomingMessage): Boolean {
+    if (message.msg != MSG_PASSTHRU) return false
+
+    return message.body.orEmpty().any { element ->
+        val path = (element as? JsonObject)
+            ?.child("data")
+            ?.child("event")
+            ?.text("path")
+        path?.contains(SOUND_BYPASS_REQUIRED) == true
+    }
+}
+
+private fun JsonObject.child(key: String): JsonObject? = this[key] as? JsonObject
 
 private fun JsonObject.text(key: String): String? {
     val primitive = this[key] as? JsonPrimitive ?: return null
@@ -135,3 +152,6 @@ private fun JsonObject.text(key: String): String? {
 
 private fun JsonObject.number(key: String): Long? =
     (this[key] as? JsonPrimitive)?.longOrNull
+
+private fun JsonObject.flag(key: String): Boolean? =
+    (this[key] as? JsonPrimitive)?.booleanOrNull

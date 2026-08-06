@@ -56,7 +56,7 @@
     <string name="action_sign_out">Uitloggen</string>
     <string name="error_no_location">Dit account heeft geen locatie.</string>
     <string name="error_no_panel">Geen alarmpaneel gevonden op deze locatie.</string>
-    <string name="error_mode_rejected">Het paneel weigerde de wijziging. Mogelijk moet een sensor worden overbrugd via de officiële app.</string>
+    <string name="error_mode_rejected">Het paneel weigerde de wijziging.</string>
     <string name="error_timeout">Het paneel antwoordde niet op tijd.</string>
     <string name="panel_current_state">Huidige status</string>
     <string name="settings_title">Instellingen</string>
@@ -72,4 +72,14 @@
     <string name="theme_dark">Donker</string>
     <string name="settings_language_title">Taal</string>
     <string name="language_system">Systeemtaal</string>
+    <string name="widget_bypass_question">Open sensoren negeren?</string>
+    <string name="widget_bypass_accept">✓</string>
+    <string name="widget_bypass_refuse">✕</string>
+    <string name="widget_bypass_accept_description">Toch inschakelen en de open sensoren negeren</string>
+    <string name="widget_bypass_refuse_description">Annuleren, niet inschakelen</string>
+    <string name="widget_bypass_sensors_unknown">Een sensor staat open</string>
+    <string name="panel_bypass_title">Er staan sensoren open</string>
+    <string name="panel_bypass_subtitle">Het paneel weigert in te schakelen zolang die open staan. Toch inschakelen laat ze onbewaakt.</string>
+    <string name="panel_bypass_accept">Toch inschakelen</string>
+    <string name="panel_bypass_refuse">Annuleren</string>
 </resources>

@@ -1,20 +1,14 @@
 package dev.ringalarmwidget.data
 
 import android.content.Context
-import dev.ringalarmwidget.core.auth.LeaseFailure
-import dev.ringalarmwidget.core.auth.TokenLease
+import dev.ringalarmwidget.core.auth.Authorized
+import dev.ringalarmwidget.core.auth.authorize
 import dev.ringalarmwidget.core.panel.AlarmMode
 import dev.ringalarmwidget.core.panel.Fetch
 import dev.ringalarmwidget.core.panel.PanelResult
 import dev.ringalarmwidget.core.panel.PanelSnapshot
-
-sealed interface PanelOutcome {
-    data class Ready(val locationName: String?, val snapshot: PanelSnapshot) : PanelOutcome
-    data object SignedOut : PanelOutcome
-    data object NoLocation : PanelOutcome
-    data class Unavailable(val cause: LeaseFailure) : PanelOutcome
-    data class Failed(val result: PanelResult) : PanelOutcome
-}
+import dev.ringalarmwidget.core.panel.rejectsCredentials
+import kotlinx.coroutines.sync.withLock
 
 class PanelRepository(context: Context) {
 
@@ -22,27 +16,61 @@ class PanelRepository(context: Context) {
 
     val store: AndroidTokenStore get() = container.store
 
-    suspend fun read(): PanelOutcome = settle(
-        withLocation { token, locationId -> container.panel().readMode(token, locationId) }
-    )
+    suspend fun read(): PanelOutcome = container.panelGate.withLock {
+        val outcome = withLocation { token, locationId ->
+            container.panel().readMode(token, locationId)
+        }
+        recordRead(outcome)
+        outcome
+    }
 
-    suspend fun set(mode: AlarmMode): PanelOutcome = settle(
-        withLocation { token, locationId -> container.panel().setMode(token, locationId, mode) }
-    )
+    suspend fun set(
+        mode: AlarmMode,
+        mayRetry: Boolean = false,
+        bypassZids: List<String> = emptyList(),
+    ): PanelOutcome = container.panelGate.withLock {
+        val outcome = withLocation { token, locationId ->
+            container.panel().setMode(token, locationId, mode, bypassZids)
+        }
+        recordChange(outcome, retrying = mayRetry && outcome.isTransient)
+        outcome
+    }
+
+    suspend fun abandonChange() {
+        store.setPendingMode(null)
+        store.setBypassPrompt(null)
+        store.setLastAttemptFailed(true)
+    }
+
+    suspend fun dismissBypass() {
+        store.setBypassPrompt(null)
+        store.setPendingMode(null)
+        store.setLastAttemptFailed(false)
+    }
 
     private suspend fun withLocation(block: suspend (String, String) -> PanelResult): PanelOutcome {
-        val token = when (val lease = container.sessionManager().accessToken()) {
-            is TokenLease.Active -> lease.accessToken
-            TokenLease.SignedOut -> return PanelOutcome.SignedOut
-            is TokenLease.Unavailable -> return PanelOutcome.Unavailable(lease.cause)
-        }
+        val authorized = container.sessionManager().authorize(
+            rejected = { it is PanelOutcome.Failed && it.result.rejectsCredentials },
+            block = { token -> attempt(token, block) },
+        )
 
+        return when (authorized) {
+            is Authorized.Done -> authorized.value
+            Authorized.SignedOut -> PanelOutcome.SignedOut
+            is Authorized.Unavailable -> PanelOutcome.Unavailable(authorized.cause)
+        }
+    }
+
+    private suspend fun attempt(
+        token: String,
+        block: suspend (String, String) -> PanelResult,
+    ): PanelOutcome {
         val cache = store.panelCache()
 
         if (cache?.locationName != null) {
             val result = block(token, cache.locationId)
             if (result is PanelResult.Ready) return PanelOutcome.Ready(cache.locationName, result.snapshot)
-            if (!warrantsDiscovery(result)) return PanelOutcome.Failed(result)
+            if (!warrantsDiscovery(result)) return interpret(result)
         }
 
         val locations = when (val fetched = container.locations().locations(token)) {
@@ -59,26 +87,46 @@ class PanelRepository(context: Context) {
 
         return when (val result = block(token, location.id)) {
             is PanelResult.Ready -> PanelOutcome.Ready(location.name, result.snapshot)
-            else -> PanelOutcome.Failed(result)
+            else -> interpret(result)
         }
     }
 
-    private suspend fun settle(outcome: PanelOutcome): PanelOutcome {
-        store.setPendingMode(null)
-        store.setLastAttemptFailed(
-            outcome is PanelOutcome.Failed ||
-                outcome is PanelOutcome.Unavailable ||
-                outcome is PanelOutcome.NoLocation
-        )
-        if (outcome is PanelOutcome.Ready) {
-            store.setCachedMode(outcome.snapshot.mode)
-            store.setTransitionEndsAt(outcome.snapshot.transitionEndsAtEpochMillis)
+    private fun interpret(result: PanelResult): PanelOutcome = when (result) {
+        is PanelResult.BypassRequired -> PanelOutcome.NeedsBypass(result.requested, result.sensors)
+        else -> PanelOutcome.Failed(result)
+    }
+
+    private suspend fun recordRead(outcome: PanelOutcome) {
+        if (outcome !is PanelOutcome.Ready) return
+        store.setLastAttemptFailed(false)
+        cache(outcome.snapshot)
+    }
+
+    private suspend fun recordChange(outcome: PanelOutcome, retrying: Boolean) {
+        if (retrying) return
+
+        if (outcome is PanelOutcome.NeedsBypass) {
+            store.setPendingMode(null)
+            store.setLastAttemptFailed(false)
+            store.setBypassPrompt(
+                BypassPrompt.of(outcome.requested, outcome.sensors, System.currentTimeMillis())
+            )
+            return
         }
-        return outcome
+
+        store.setPendingMode(null)
+        store.setBypassPrompt(null)
+        store.setLastAttemptFailed(outcome !is PanelOutcome.Ready && outcome !is PanelOutcome.SignedOut)
+        if (outcome is PanelOutcome.Ready) cache(outcome.snapshot)
+    }
+
+    private suspend fun cache(snapshot: PanelSnapshot) {
+        store.setCachedMode(snapshot.mode)
+        store.setTransitionEndsAt(snapshot.transitionEndsAtEpochMillis)
     }
 
     private fun warrantsDiscovery(result: PanelResult): Boolean = when (result) {
-        is PanelResult.Unreachable -> result.statusCode != null
+        is PanelResult.Unreachable -> result.statusCode != null && !result.rejectsCredentials
         PanelResult.NoSecurityPanel, PanelResult.NoUsableAsset -> true
         else -> false
     }

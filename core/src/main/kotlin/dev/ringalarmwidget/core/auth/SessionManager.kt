@@ -28,6 +28,20 @@ class SessionManager(
             return@withLock TokenLease.Active(session.accessToken)
         }
 
+        rotate(session)
+    }
+
+    suspend fun renew(rejectedAccessToken: String): TokenLease = mutex.withLock {
+        val session = store.load() ?: return@withLock TokenLease.SignedOut
+
+        if (session.accessToken != rejectedAccessToken) {
+            return@withLock TokenLease.Active(session.accessToken)
+        }
+
+        rotate(session)
+    }
+
+    private suspend fun rotate(session: Session): TokenLease =
         when (val result = refresher.refresh(session.refreshToken)) {
             is AuthResult.Success -> {
                 store.save(result.session)
@@ -47,7 +61,6 @@ class SessionManager(
             is AuthResult.Failed ->
                 TokenLease.Unavailable(LeaseFailure.Unreachable(result.statusCode, result.diagnostic))
         }
-    }
 
     suspend fun adopt(session: Session): Unit = mutex.withLock {
         store.save(session)

@@ -44,6 +44,44 @@ class ModeChangeTest {
     }
 
     @Test
+    fun `un document partiel sans mode n est pas un refus`() {
+        val partial = panel(mode = null)
+        val watch = PanelWatch(matched = null, lastSeen = partial)
+
+        val result = interpretModeChange(AlarmMode.HOME, watch)
+
+        assertEquals(PanelResult.TimedOut(STAGE_MODE_CONFIRMATION), result)
+    }
+
+    @Test
+    fun `un bypass demande par le panneau remonte les capteurs en defaut`() {
+        val watch = PanelWatch(matched = null, lastSeen = null, bypassRequired = true)
+        val faulted = listOf(FaultedSensor("zid-1", "Fenetre living"))
+
+        val result = interpretModeChange(AlarmMode.HOME, watch, faulted)
+
+        assertEquals(PanelResult.BypassRequired(AlarmMode.HOME, faulted), result)
+    }
+
+    @Test
+    fun `un bypass demande prime sur un etat partiel observe`() {
+        val watch = PanelWatch(matched = null, lastSeen = panel(AlarmMode.DISARMED), bypassRequired = true)
+
+        val result = interpretModeChange(AlarmMode.HOME, watch, emptyList())
+
+        assertIs<PanelResult.BypassRequired>(result)
+    }
+
+    @Test
+    fun `une confirmation prime sur une demande de bypass`() {
+        val watch = PanelWatch(matched = panel(AlarmMode.HOME), lastSeen = null, bypassRequired = true)
+
+        val result = interpretModeChange(AlarmMode.HOME, watch, emptyList())
+
+        assertIs<PanelResult.Ready>(result)
+    }
+
+    @Test
     fun `le delai de sortie est repercute dans l instantane`() {
         val watch = PanelWatch(
             matched = panel(AlarmMode.AWAY, transitioning = true),
