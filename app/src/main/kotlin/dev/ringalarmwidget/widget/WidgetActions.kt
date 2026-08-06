@@ -11,6 +11,7 @@ import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.updateAll
 import dev.ringalarmwidget.core.panel.AlarmMode
 import dev.ringalarmwidget.data.AppContainer
+import dev.ringalarmwidget.data.PanelRepository
 
 val ModeKey = ActionParameters.Key<String>("mode")
 
@@ -19,7 +20,7 @@ internal suspend fun updateWidgets(context: Context) {
     StatusWidget().updateAll(context)
 }
 
-private fun anyWidgetPlaced(context: Context): Boolean {
+internal fun anyWidgetPlaced(context: Context): Boolean {
     val manager = AppWidgetManager.getInstance(context)
     return listOf(ModeWidgetReceiver::class.java, StatusWidgetReceiver::class.java).any {
         manager.getAppWidgetIds(ComponentName(context, it)).isNotEmpty()
@@ -41,7 +42,7 @@ class ModeWidgetReceiver : GlanceAppWidgetReceiver() {
         appWidgetIds: IntArray,
     ) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
-        WidgetWork.schedule(context)
+        WidgetWork.start(context)
     }
 
     override fun onDisabled(context: Context) {
@@ -65,7 +66,7 @@ class StatusWidgetReceiver : GlanceAppWidgetReceiver() {
         appWidgetIds: IntArray,
     ) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
-        WidgetWork.schedule(context)
+        WidgetWork.start(context)
     }
 
     override fun onDisabled(context: Context) {
@@ -98,5 +99,35 @@ class RefreshAction : ActionCallback {
         parameters: ActionParameters,
     ) {
         WidgetWork.refresh(context)
+    }
+}
+
+class ConfirmBypassAction : ActionCallback {
+
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters,
+    ) {
+        val store = AppContainer.get(context).store
+        val prompt = store.bypassPrompt() ?: return
+        val mode = prompt.requested ?: return
+
+        store.setBypassPrompt(null)
+        store.setPendingMode(mode)
+        updateWidgets(context)
+        WidgetWork.apply(context, mode, prompt.sensorZids)
+    }
+}
+
+class DismissBypassAction : ActionCallback {
+
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters,
+    ) {
+        PanelRepository(context).dismissBypass()
+        updateWidgets(context)
     }
 }

@@ -16,6 +16,8 @@ class AppContainer private constructor(context: Context) {
 
     val store = AndroidTokenStore(context)
 
+    val panelGate = Mutex()
+
     private val http = ringHttpClient(OkHttp.create())
     private val mutex = Mutex()
 

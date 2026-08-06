@@ -62,6 +62,8 @@ import dev.ringalarmwidget.core.panel.AlarmMode
 import dev.ringalarmwidget.data.ThemeChoice
 import dev.ringalarmwidget.ui.theme.LocalModePalette
 import dev.ringalarmwidget.ui.theme.RingAlarmTheme
+import dev.ringalarmwidget.widget.WidgetWork
+import dev.ringalarmwidget.widget.anyWidgetPlaced
 import kotlinx.coroutines.delay
 import kotlin.math.ceil
 
@@ -71,6 +73,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (anyWidgetPlaced(this)) WidgetWork.schedule(this)
         setContent { AppRoot(this, viewModel) }
     }
 
@@ -159,6 +162,8 @@ private fun AppContent(
                     },
                     onRefresh = viewModel::refresh,
                     onSettings = { showSettings = true },
+                    onConfirmBypass = viewModel::confirmBypass,
+                    onDismissBypass = viewModel::dismissBypass,
                 )
             }
         }
@@ -404,6 +409,8 @@ private fun PanelScreen(
     onMode: (AlarmMode) -> Unit,
     onRefresh: () -> Unit,
     onSettings: () -> Unit,
+    onConfirmBypass: () -> Unit,
+    onDismissBypass: () -> Unit,
 ) {
     Screen {
         Row(
@@ -433,11 +440,19 @@ private fun PanelScreen(
 
         StatusCard(state)
 
+        state.bypass?.let {
+            BypassCard(
+                offer = it,
+                onConfirm = onConfirmBypass,
+                onDismiss = onDismissBypass,
+            )
+        }
+
         AlarmMode.entries.forEach { mode ->
             ModeButton(
                 mode = mode,
                 active = state.displayedMode == mode,
-                enabled = !state.busy && state.displayedMode != mode,
+                enabled = !state.busy && state.bypass == null && state.displayedMode != mode,
                 onClick = { onMode(mode) },
             )
         }
@@ -453,6 +468,55 @@ private fun PanelScreen(
         }
 
         Disclaimer()
+    }
+}
+
+@Composable
+private fun BypassCard(offer: BypassOffer, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    val palette = LocalModePalette.current
+
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                stringResource(R.string.panel_bypass_title),
+                style = MaterialTheme.typography.titleSmall,
+            )
+
+            if (offer.sensorNames.isNotEmpty()) {
+                Text(
+                    offer.sensorNames.joinToString(", "),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = palette.of(offer.mode),
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            Text(
+                stringResource(R.string.panel_bypass_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Button(
+                    onClick = onConfirm,
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(stringResource(R.string.panel_bypass_accept))
+                }
+                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.panel_bypass_refuse))
+                }
+            }
+        }
     }
 }
 

@@ -59,7 +59,7 @@
     <string name="action_sign_out">Se déconnecter</string>
     <string name="error_no_location">Aucune location sur ce compte.</string>
     <string name="error_no_panel">Aucun panneau d\'alarme trouvé à cette location.</string>
-    <string name="error_mode_rejected">Le panneau a refusé le changement. Un capteur demande peut-être un bypass depuis l\'application officielle.</string>
+    <string name="error_mode_rejected">Le panneau a refusé le changement.</string>
     <string name="error_timeout">Le panneau n\'a pas répondu à temps.</string>
     <string name="panel_current_state">État actuel</string>
     <string name="settings_title">Réglages</string>
@@ -75,4 +75,14 @@
     <string name="theme_dark">Sombre</string>
     <string name="settings_language_title">Langue</string>
     <string name="language_system">Langue du système</string>
+    <string name="widget_bypass_question">Ignorer capteurs ouverts ?</string>
+    <string name="widget_bypass_accept">✓</string>
+    <string name="widget_bypass_refuse">✕</string>
+    <string name="widget_bypass_accept_description">Armer quand même, en ignorant les capteurs ouverts</string>
+    <string name="widget_bypass_refuse_description">Annuler, ne pas armer</string>
+    <string name="widget_bypass_sensors_unknown">Un capteur est ouvert</string>
+    <string name="panel_bypass_title">Des capteurs sont ouverts</string>
+    <string name="panel_bypass_subtitle">Le panneau refuse d\'armer tant qu\'ils sont ouverts. Armer quand même les laisse non surveillés.</string>
+    <string name="panel_bypass_accept">Armer quand même</string>
+    <string name="panel_bypass_refuse">Annuler</string>
 </resources>

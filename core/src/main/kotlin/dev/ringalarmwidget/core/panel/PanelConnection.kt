@@ -16,10 +16,11 @@ internal data class PanelFrame(
 internal data class PanelWatch(
     val matched: PanelDevice?,
     val lastSeen: PanelDevice?,
+    val bypassRequired: Boolean = false,
 )
 
 internal sealed interface PanelLookup {
-    data class Found(val device: PanelDevice) : PanelLookup
+    data class Found(val device: PanelDevice, val faulted: List<FaultedSensor>) : PanelLookup
     data object Absent : PanelLookup
     data object TimedOut : PanelLookup
 }
@@ -68,10 +69,11 @@ internal class PanelConnection(
                 if (frame.message.msg != MSG_DEVICE_LIST) continue
 
                 frame.message.src?.let { answered += it }
-                val panel = frame.devices().firstOrNull { it.isSecurityPanel }
+                val devices = frame.devices()
+                val panel = devices.firstOrNull { it.isSecurityPanel }
 
                 result = when {
-                    panel != null -> PanelLookup.Found(panel)
+                    panel != null -> PanelLookup.Found(panel, devices.faultedSensors())
                     answered.size >= assets.size -> PanelLookup.Absent
                     else -> null
                 }
@@ -88,21 +90,28 @@ internal class PanelConnection(
         accept: (PanelDevice) -> Boolean,
     ): PanelWatch {
         var lastSeen: PanelDevice? = null
+        var refused = false
 
         val matched = withTimeoutOrNull(timeoutMillis) {
             var found: PanelDevice? = null
             while (found == null) {
                 val frame = nextFrame() ?: break
+
+                if (announcesBypassRequired(frame.message)) {
+                    refused = true
+                    break
+                }
+
                 if (frame.message.datatype != DATATYPE_DEVICE_DOC) continue
 
                 val device = frame.devices().firstOrNull { it.zid == zid } ?: continue
-                lastSeen = device
+                if (device.mode != null) lastSeen = device
                 if (accept(device)) found = device
             }
             found
         }
 
-        return PanelWatch(matched = matched, lastSeen = lastSeen)
+        return PanelWatch(matched = matched, lastSeen = lastSeen, bypassRequired = refused)
     }
 
     private suspend fun send(message: OutgoingMessage) {
@@ -138,3 +147,6 @@ internal fun PanelFrame.devices(): List<PanelDevice> {
         flattenDeviceDoc(doc).toPanelDevice(source)
     }
 }
+
+internal fun List<PanelDevice>.faultedSensors(): List<FaultedSensor> =
+    filter { it.isFaultedSensor }.map { FaultedSensor(zid = it.zid, name = it.name) }

@@ -57,7 +57,7 @@
     <string name="action_sign_out">Sign out</string>
     <string name="error_no_location">This account has no location.</string>
     <string name="error_no_panel">No alarm panel found at this location.</string>
-    <string name="error_mode_rejected">The panel refused the change. A sensor may need bypassing from the official app.</string>
+    <string name="error_mode_rejected">The panel refused the change.</string>
     <string name="error_timeout">The panel did not answer in time.</string>
     <string name="panel_current_state">Current state</string>
     <string name="settings_title">Settings</string>
@@ -73,4 +73,14 @@
     <string name="theme_dark">Dark</string>
     <string name="settings_language_title">Language</string>
     <string name="language_system">System language</string>
+    <string name="widget_bypass_question">Ignore open sensors?</string>
+    <string name="widget_bypass_accept">✓</string>
+    <string name="widget_bypass_refuse">✕</string>
+    <string name="widget_bypass_accept_description">Arm anyway, ignoring the open sensors</string>
+    <string name="widget_bypass_refuse_description">Cancel, do not arm</string>
+    <string name="widget_bypass_sensors_unknown">A sensor is open</string>
+    <string name="panel_bypass_title">Some sensors are open</string>
+    <string name="panel_bypass_subtitle">The panel refuses to arm while these are open. Arming anyway leaves them unmonitored.</string>
+    <string name="panel_bypass_accept">Arm anyway</string>
+    <string name="panel_bypass_refuse">Cancel</string>
 </resources>

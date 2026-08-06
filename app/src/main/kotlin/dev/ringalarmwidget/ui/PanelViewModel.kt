@@ -44,12 +44,19 @@ sealed interface UiState {
         val pending: AlarmMode? = null,
         val refreshing: Boolean = false,
         val message: String? = null,
+        val bypass: BypassOffer? = null,
     ) : UiState {
         val busy: Boolean get() = pending != null
 
         val displayedMode: AlarmMode? get() = pending ?: mode
     }
 }
+
+data class BypassOffer(
+    val mode: AlarmMode,
+    val sensorNames: List<String>,
+    val sensorZids: List<String>,
+)
 
 class PanelViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -82,7 +89,7 @@ class PanelViewModel(application: Application) : AndroidViewModel(application) {
         }
         viewModelScope.launch {
             restoreCache()
-            refresh()
+            if (!restoreBypass()) refresh()
         }
     }
 
@@ -155,8 +162,7 @@ class PanelViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onResumed() {
-        val current = _state.value
-        if (current is UiState.Panel && !current.busy) refresh()
+        if (idle()) refresh()
     }
 
     fun onVisible() {
@@ -164,10 +170,14 @@ class PanelViewModel(application: Application) : AndroidViewModel(application) {
         watchJob = viewModelScope.launch {
             while (isActive) {
                 delay(VISIBLE_POLL_MILLIS)
-                val current = _state.value
-                if (current is UiState.Panel && !current.busy) refresh()
+                if (idle()) refresh()
             }
         }
+    }
+
+    private fun idle(): Boolean {
+        val current = _state.value
+        return current is UiState.Panel && !current.busy && current.bypass == null
     }
 
     fun onHidden() {
@@ -179,9 +189,34 @@ class PanelViewModel(application: Application) : AndroidViewModel(application) {
         val current = _state.value as? UiState.Panel ?: return
         loadJob?.cancel()
         transitionJob?.cancel()
-        _state.value = current.copy(pending = mode, refreshing = false, message = null)
+        _state.value = current.copy(pending = mode, refreshing = false, message = null, bypass = null)
 
         viewModelScope.launch { apply(repository.set(mode), current.locationName) }
+    }
+
+    fun confirmBypass() {
+        val current = _state.value as? UiState.Panel ?: return
+        val offer = current.bypass ?: return
+        loadJob?.cancel()
+        _state.value = current.copy(pending = offer.mode, refreshing = false, message = null, bypass = null)
+
+        viewModelScope.launch {
+            apply(
+                repository.set(offer.mode, bypassZids = offer.sensorZids),
+                current.locationName,
+            )
+        }
+    }
+
+    fun dismissBypass() {
+        val current = _state.value as? UiState.Panel ?: return
+        _state.value = current.copy(bypass = null, message = null)
+
+        viewModelScope.launch {
+            repository.dismissBypass()
+            updateWidgets(context())
+            refresh()
+        }
     }
 
     fun signOut() {
@@ -241,11 +276,45 @@ class PanelViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
 
+            is PanelOutcome.NeedsBypass -> offerBypass(locationName, outcome)
+
             is PanelOutcome.Failed -> fail(locationName, outcome.result)
         }
+
+        updateWidgets(context())
     }
 
-    private suspend fun publish(locationName: String?, snapshot: PanelSnapshot) {
+    private fun offerBypass(locationName: String?, outcome: PanelOutcome.NeedsBypass) {
+        val current = _state.value as? UiState.Panel
+        _state.value = UiState.Panel(
+            locationName = locationName ?: current?.locationName,
+            mode = current?.mode,
+            transitioning = false,
+            bypass = BypassOffer(
+                mode = outcome.requested,
+                sensorNames = outcome.sensors.mapNotNull { it.name },
+                sensorZids = outcome.sensors.map { it.zid },
+            ),
+        )
+    }
+
+    private suspend fun restoreBypass(): Boolean {
+        val prompt = repository.store.bypassPrompt() ?: return false
+        val mode = prompt.requested ?: return false
+        val current = _state.value as? UiState.Panel ?: return false
+
+        _state.value = current.copy(
+            refreshing = false,
+            bypass = BypassOffer(
+                mode = mode,
+                sensorNames = prompt.sensorNames,
+                sensorZids = prompt.sensorZids,
+            ),
+        )
+        return true
+    }
+
+    private fun publish(locationName: String?, snapshot: PanelSnapshot) {
         _state.value = UiState.Panel(
             locationName = locationName,
             mode = snapshot.mode,
@@ -253,7 +322,6 @@ class PanelViewModel(application: Application) : AndroidViewModel(application) {
             transitionEndsAt = snapshot.transitionEndsAtEpochMillis,
         )
         scheduleTransitionRefresh(snapshot.transitionEndsAtEpochMillis)
-        updateWidgets(context())
     }
 
     private fun scheduleTransitionRefresh(endsAt: Long?) {
@@ -284,7 +352,8 @@ class PanelViewModel(application: Application) : AndroidViewModel(application) {
         PanelResult.NoSecurityPanel, PanelResult.NoUsableAsset ->
             context().getString(R.string.error_no_panel)
 
-        is PanelResult.Rejected -> context().getString(R.string.error_mode_rejected)
+        is PanelResult.Rejected, is PanelResult.BypassRequired ->
+            context().getString(R.string.error_mode_rejected)
         is PanelResult.TimedOut -> context().getString(R.string.error_timeout)
         is PanelResult.Unreachable -> context().getString(R.string.error_unreachable)
     }

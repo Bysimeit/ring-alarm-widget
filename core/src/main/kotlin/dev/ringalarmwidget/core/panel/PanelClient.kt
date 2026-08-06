@@ -16,7 +16,7 @@ class PanelClient(
 ) {
 
     suspend fun readMode(accessToken: String, locationId: String): PanelResult =
-        withSecurityPanel(accessToken, locationId) { _, panel ->
+        withSecurityPanel(accessToken, locationId) { _, panel, _ ->
             PanelResult.Ready(panel.snapshot())
         }
 
@@ -25,7 +25,7 @@ class PanelClient(
         locationId: String,
         mode: AlarmMode,
         bypassZids: List<String> = emptyList(),
-    ): PanelResult = withSecurityPanel(accessToken, locationId) { connection, panel ->
+    ): PanelResult = withSecurityPanel(accessToken, locationId) { connection, panel, faulted ->
         if (panel.mode == mode && !panel.isTransitioning) {
             return@withSecurityPanel PanelResult.Ready(panel.snapshot())
         }
@@ -36,13 +36,13 @@ class PanelClient(
             it.mode == mode
         }
 
-        interpretModeChange(mode, watch)
+        interpretModeChange(mode, watch, faulted)
     }
 
     private suspend fun withSecurityPanel(
         accessToken: String,
         locationId: String,
-        block: suspend (PanelConnection, PanelDevice) -> PanelResult,
+        block: suspend (PanelConnection, PanelDevice, List<FaultedSensor>) -> PanelResult,
     ): PanelResult {
         val ticket = when (val fetched = locationClient.ticket(accessToken, locationId)) {
             is Fetch.Failed -> return PanelResult.Unreachable(fetched.statusCode, fetched.diagnostic)
@@ -58,7 +58,7 @@ class PanelClient(
             http.webSocket(urlString = ticket.webSocketUrl()) {
                 val connection = PanelConnection(this)
                 outcome = when (val lookup = connection.findSecurityPanel(assets, timeouts.deviceListMillis)) {
-                    is PanelLookup.Found -> block(connection, lookup.device)
+                    is PanelLookup.Found -> block(connection, lookup.device, lookup.faulted)
                     PanelLookup.Absent -> PanelResult.NoSecurityPanel
                     PanelLookup.TimedOut -> PanelResult.TimedOut(STAGE_DEVICE_LIST)
                 }
@@ -78,9 +78,14 @@ class PanelClient(
     }
 }
 
-internal fun interpretModeChange(requested: AlarmMode, watch: PanelWatch): PanelResult = when {
+internal fun interpretModeChange(
+    requested: AlarmMode,
+    watch: PanelWatch,
+    faulted: List<FaultedSensor> = emptyList(),
+): PanelResult = when {
     watch.matched != null -> PanelResult.Ready(watch.matched.snapshot())
-    watch.lastSeen != null -> PanelResult.Rejected(requested, watch.lastSeen.mode)
+    watch.bypassRequired -> PanelResult.BypassRequired(requested, faulted)
+    watch.lastSeen?.mode != null -> PanelResult.Rejected(requested, watch.lastSeen.mode)
     else -> PanelResult.TimedOut(STAGE_MODE_CONFIRMATION)
 }
 

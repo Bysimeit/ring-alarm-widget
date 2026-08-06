@@ -51,6 +51,7 @@ class AndroidTokenStore(context: Context) : TokenStore {
             it.remove(KEY_PENDING)
             it.remove(KEY_FAILED)
             it.remove(KEY_TRANSITION)
+            it.remove(KEY_BYPASS)
         }
     }
 
@@ -93,13 +94,6 @@ class AndroidTokenStore(context: Context) : TokenStore {
         }
     }
 
-    suspend fun pendingMode(): AlarmMode? {
-        val raw = store.data.first()[KEY_PENDING]?.let { decrypt(it) } ?: return null
-        val requestedAt = raw.substringAfter(SEPARATOR, "").toLongOrNull() ?: return null
-        if (System.currentTimeMillis() - requestedAt > PENDING_TTL_MILLIS) return null
-        return AlarmMode.fromWire(raw.substringBefore(SEPARATOR))
-    }
-
     suspend fun setPendingMode(mode: AlarmMode?) {
         store.edit {
             if (mode == null) {
@@ -110,10 +104,20 @@ class AndroidTokenStore(context: Context) : TokenStore {
         }
     }
 
-    suspend fun lastAttemptFailed(): Boolean = store.data.first()[KEY_FAILED] ?: false
-
     suspend fun setLastAttemptFailed(failed: Boolean) {
         store.edit { if (failed) it[KEY_FAILED] = true else it.remove(KEY_FAILED) }
+    }
+
+    suspend fun bypassPrompt(): BypassPrompt? = livePrompt(store.data.first()[KEY_BYPASS])
+
+    suspend fun setBypassPrompt(prompt: BypassPrompt?) {
+        store.edit {
+            if (prompt == null) {
+                it.remove(KEY_BYPASS)
+            } else {
+                it[KEY_BYPASS] = encrypt(RingJson.encodeToString(prompt))
+            }
+        }
     }
 
     suspend fun confirmDisarm(): Boolean = store.data.first()[KEY_CONFIRM_DISARM] ?: false
@@ -137,6 +141,7 @@ class AndroidTokenStore(context: Context) : TokenStore {
             failed = preferences[KEY_FAILED] ?: false,
             theme = ThemeChoice.fromStored(preferences[KEY_WIDGET_THEME]),
             transitionEndsAt = preferences[KEY_TRANSITION]?.takeIf { it > System.currentTimeMillis() },
+            bypass = livePrompt(preferences[KEY_BYPASS]),
         )
     }
 
@@ -144,6 +149,13 @@ class AndroidTokenStore(context: Context) : TokenStore {
         store.edit {
             if (endsAt == null) it.remove(KEY_TRANSITION) else it[KEY_TRANSITION] = endsAt
         }
+    }
+
+    private fun livePrompt(payload: String?): BypassPrompt? {
+        val plain = payload?.let { decrypt(it) } ?: return null
+        val prompt = runCatching { RingJson.decodeFromString<BypassPrompt>(plain) }.getOrNull() ?: return null
+        if (System.currentTimeMillis() - prompt.requestedAtEpochMillis > BYPASS_TTL_MILLIS) return null
+        return prompt.takeIf { it.requested != null }
     }
 
     private fun livePendingMode(payload: String?): AlarmMode? {
@@ -209,6 +221,7 @@ class AndroidTokenStore(context: Context) : TokenStore {
         val KEY_THEME = stringPreferencesKey("theme")
         val KEY_WIDGET_THEME = stringPreferencesKey("widget_theme")
         val KEY_TRANSITION = longPreferencesKey("transition_ends_at")
+        val KEY_BYPASS = stringPreferencesKey("bypass_prompt")
 
         const val ANDROID_KEYSTORE = "AndroidKeyStore"
         const val KEY_ALIAS = "session-key"
@@ -216,6 +229,7 @@ class AndroidTokenStore(context: Context) : TokenStore {
         const val GCM_IV_LENGTH = 12
         const val GCM_TAG_BITS = 128
         const val SEPARATOR = "@"
-        const val PENDING_TTL_MILLIS = 60_000L
+        const val PENDING_TTL_MILLIS = 150_000L
+        const val BYPASS_TTL_MILLIS = 300_000L
     }
 }

@@ -136,6 +136,46 @@ class SessionManagerTest {
     }
 
     @Test
+    fun `renouvellement force rafraichit un jeton encore jeune`() = runTest {
+        val store = InMemoryTokenStore(session(expiresAt = 10_000))
+        val refresher = CountingRefresher {
+            AuthResult.Success(Session("at2", "rt2", 14_000))
+        }
+        val manager = SessionManager(refresher, store, nowEpochSeconds = { 1_000 })
+
+        val lease = manager.renew("at1")
+
+        assertEquals(TokenLease.Active("at2"), lease)
+        assertEquals(1, refresher.calls)
+    }
+
+    @Test
+    fun `renouvellement d un jeton deja remplace ne rappelle pas le reseau`() = runTest {
+        val store = InMemoryTokenStore(session(expiresAt = 10_000))
+        val refresher = CountingRefresher { AuthResult.Failed(null, "ne devrait pas etre appele") }
+        val manager = SessionManager(refresher, store, nowEpochSeconds = { 1_000 })
+
+        val lease = manager.renew("un-vieux-jeton")
+
+        assertEquals(TokenLease.Active("at1"), lease)
+        assertEquals(0, refresher.calls)
+    }
+
+    @Test
+    fun `renouvellements concurrents ne provoquent qu un seul refresh`() = runTest {
+        val store = InMemoryTokenStore(session(expiresAt = 10_000))
+        val refresher = CountingRefresher {
+            AuthResult.Success(Session("at2", "rt2", 14_000))
+        }
+        val manager = SessionManager(refresher, store, nowEpochSeconds = { 1_000 })
+
+        val leases = List(8) { async { manager.renew("at1") } }.awaitAll()
+
+        assertEquals(1, refresher.calls)
+        leases.forEach { assertEquals(TokenLease.Active("at2"), it) }
+    }
+
+    @Test
     fun `absence de session signale une deconnexion`() = runTest {
         val store = InMemoryTokenStore(null)
         val refresher = CountingRefresher { AuthResult.Failed(null, "ne devrait pas etre appele") }

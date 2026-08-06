@@ -11,9 +11,13 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
+import androidx.glance.action.Action
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
+import androidx.glance.semantics.contentDescription
+import androidx.glance.semantics.semantics
+import androidx.glance.unit.ColorProvider
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.SizeMode
@@ -42,6 +46,7 @@ import androidx.compose.runtime.getValue
 import dev.ringalarmwidget.R
 import dev.ringalarmwidget.core.panel.AlarmMode
 import dev.ringalarmwidget.data.AppContainer
+import dev.ringalarmwidget.data.BypassPrompt
 import dev.ringalarmwidget.data.WidgetSnapshot
 import dev.ringalarmwidget.ui.MainActivity
 
@@ -65,6 +70,7 @@ class ModeWidget : GlanceAppWidget() {
                 pending = snapshot.pending,
                 failed = snapshot.failed,
                 transitionEndsAt = snapshot.transitionEndsAt,
+                bypass = snapshot.bypass,
             )
         }
     }
@@ -78,6 +84,7 @@ private fun Body(
     pending: AlarmMode?,
     failed: Boolean,
     transitionEndsAt: Long?,
+    bypass: BypassPrompt?,
 ) {
     val compact = LocalSize.current.height < TallSize.height
     val shown = pending ?: mode
@@ -89,15 +96,19 @@ private fun Body(
             .padding(if (compact) 8.dp else 14.dp),
     ) {
         if (!compact) {
-            Header(
-                skin = skin,
-                shown = shown,
-                pending = pending != null,
-                failed = failed,
-                transitionEndsAt = transitionEndsAt,
-            )
+            if (bypass != null) {
+                BypassHeader(skin = skin, prompt = bypass)
+            } else {
+                Header(
+                    skin = skin,
+                    shown = shown,
+                    pending = pending != null,
+                    failed = failed,
+                    transitionEndsAt = transitionEndsAt,
+                )
+            }
 
-            if (transitionEndsAt != null) {
+            if (transitionEndsAt != null && bypass == null) {
                 Spacer(GlanceModifier.height(5.dp))
                 LinearProgressIndicator(
                     color = accentOf(skin, shown),
@@ -109,8 +120,12 @@ private fun Body(
             }
         }
 
-        if (signedIn) {
-            Modes(
+        when {
+            !signedIn -> SignInHint(skin = skin, compact = compact)
+
+            bypass != null -> BypassChoice(skin = skin, prompt = bypass, compact = compact)
+
+            else -> Modes(
                 skin = skin,
                 shown = shown,
                 locked = pending != null,
@@ -118,9 +133,110 @@ private fun Body(
                 countdown = if (compact) transitionEndsAt else null,
                 compact = compact,
             )
-        } else {
-            SignInHint(skin = skin, compact = compact)
         }
+    }
+}
+
+@Composable
+private fun BypassHeader(skin: Skin, prompt: BypassPrompt) {
+    val context = LocalContext.current
+
+    Column {
+        Text(
+            text = context.getString(R.string.widget_bypass_question),
+            style = TextStyle(
+                color = accentOf(skin, prompt.requested),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+            maxLines = 1,
+        )
+        Text(
+            text = sensorSummary(context, prompt),
+            style = TextStyle(color = skin.muted, fontSize = 11.sp),
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+private fun BypassChoice(skin: Skin, prompt: BypassPrompt, compact: Boolean) {
+    val context = LocalContext.current
+
+    Row(modifier = GlanceModifier.fillMaxWidth().fillMaxHeight()) {
+        if (compact) {
+            Box(
+                modifier = GlanceModifier
+                    .defaultWeight()
+                    .fillMaxHeight()
+                    .background(ImageProvider(skin.pill)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = context.getString(R.string.widget_bypass_question),
+                    style = TextStyle(color = skin.ink, fontSize = 11.sp, textAlign = TextAlign.Center),
+                    maxLines = 2,
+                )
+            }
+            Spacer(GlanceModifier.width(6.dp))
+        }
+
+        BypassButton(
+            label = context.getString(R.string.widget_bypass_accept),
+            description = context.getString(R.string.widget_bypass_accept_description),
+            background = prompt.requested?.let { pillOf(skin, it, true) } ?: skin.pill,
+            color = OnAccent,
+            callback = actionRunCallback<ConfirmBypassAction>(),
+            modifier = GlanceModifier.defaultWeight().fillMaxHeight(),
+        )
+
+        Spacer(GlanceModifier.width(if (compact) 6.dp else 8.dp))
+
+        BypassButton(
+            label = context.getString(R.string.widget_bypass_refuse),
+            description = context.getString(R.string.widget_bypass_refuse_description),
+            background = skin.pill,
+            color = skin.ink,
+            callback = actionRunCallback<DismissBypassAction>(),
+            modifier = GlanceModifier.defaultWeight().fillMaxHeight(),
+        )
+    }
+}
+
+@Composable
+private fun BypassButton(
+    label: String,
+    description: String,
+    background: Int,
+    color: ColorProvider,
+    callback: Action,
+    modifier: GlanceModifier,
+) {
+    Box(
+        modifier = modifier
+            .background(ImageProvider(background))
+            .semantics { contentDescription = description }
+            .clickable(callback),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = TextStyle(
+                color = color,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+            ),
+            maxLines = 1,
+        )
+    }
+}
+
+private fun sensorSummary(context: Context, prompt: BypassPrompt): String {
+    val names = prompt.sensorNames
+    return when {
+        names.isEmpty() -> context.getString(R.string.widget_bypass_sensors_unknown)
+        else -> names.joinToString(", ")
     }
 }
 

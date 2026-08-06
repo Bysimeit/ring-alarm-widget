@@ -56,7 +56,7 @@
     <string name="action_sign_out">Abmelden</string>
     <string name="error_no_location">Dieses Konto hat keinen Standort.</string>
     <string name="error_no_panel">An diesem Standort wurde keine Alarmzentrale gefunden.</string>
-    <string name="error_mode_rejected">Die Zentrale hat die Änderung abgelehnt. Ein Sensor muss möglicherweise in der offiziellen App überbrückt werden.</string>
+    <string name="error_mode_rejected">Die Zentrale hat die Änderung abgelehnt.</string>
     <string name="error_timeout">Die Zentrale hat nicht rechtzeitig geantwortet.</string>
     <string name="panel_current_state">Aktueller Status</string>
     <string name="settings_title">Einstellungen</string>
@@ -72,4 +72,14 @@
     <string name="theme_dark">Dunkel</string>
     <string name="settings_language_title">Sprache</string>
     <string name="language_system">Systemsprache</string>
+    <string name="widget_bypass_question">Offene Sensoren ignorieren?</string>
+    <string name="widget_bypass_accept">✓</string>
+    <string name="widget_bypass_refuse">✕</string>
+    <string name="widget_bypass_accept_description">Trotzdem scharfschalten und offene Sensoren ignorieren</string>
+    <string name="widget_bypass_refuse_description">Abbrechen, nicht scharfschalten</string>
+    <string name="widget_bypass_sensors_unknown">Ein Sensor ist offen</string>
+    <string name="panel_bypass_title">Einige Sensoren sind offen</string>
+    <string name="panel_bypass_subtitle">Die Zentrale schaltet nicht scharf, solange diese offen sind. Trotzdem scharfschalten lässt sie unüberwacht.</string>
+    <string name="panel_bypass_accept">Trotzdem scharfschalten</string>
+    <string name="panel_bypass_refuse">Abbrechen</string>
 </resources>

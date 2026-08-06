@@ -25,6 +25,11 @@ data class ConnectionTicket(
     fun webSocketUrl(): String = "wss://$host/ws?authcode=$ticket&ack=false"
 }
 
+data class FaultedSensor(
+    val zid: String,
+    val name: String?,
+)
+
 data class PanelDevice(
     val zid: String,
     val assetUuid: String,
@@ -32,9 +37,13 @@ data class PanelDevice(
     val name: String?,
     val mode: AlarmMode?,
     val transitionDelayEndTimestamp: Long?,
+    val faulted: Boolean = false,
 ) {
     val isSecurityPanel: Boolean
         get() = deviceType == SECURITY_PANEL_TYPE
+
+    val isFaultedSensor: Boolean
+        get() = faulted && deviceType.startsWith(SENSOR_TYPE_PREFIX)
 
     val isTransitioning: Boolean
         get() = transitionDelayEndTimestamp != null
@@ -46,6 +55,7 @@ data class PanelDevice(
 
     companion object {
         const val SECURITY_PANEL_TYPE: String = "security-panel"
+        const val SENSOR_TYPE_PREFIX: String = "sensor."
         const val EPOCH_SECONDS_CEILING: Long = 100_000_000_000
     }
 }
@@ -68,7 +78,27 @@ sealed interface PanelResult {
 
     data class Rejected(val requested: AlarmMode, val observed: AlarmMode?) : PanelResult
 
+    data class BypassRequired(
+        val requested: AlarmMode,
+        val sensors: List<FaultedSensor>,
+    ) : PanelResult
+
     data class TimedOut(val stage: String) : PanelResult
 
     data class Unreachable(val statusCode: Int?, val diagnostic: String) : PanelResult
 }
+
+val PanelResult.rejectsCredentials: Boolean
+    get() = this is PanelResult.Unreachable && statusCode in REJECTED_CREDENTIAL_STATUSES
+
+val PanelResult.isTransient: Boolean
+    get() = when (this) {
+        is PanelResult.Ready -> false
+        is PanelResult.Rejected -> false
+        is PanelResult.BypassRequired -> false
+        PanelResult.NoSecurityPanel, PanelResult.NoUsableAsset -> false
+        is PanelResult.TimedOut -> true
+        is PanelResult.Unreachable -> !rejectsCredentials
+    }
+
+private val REJECTED_CREDENTIAL_STATUSES = setOf(401, 403)
