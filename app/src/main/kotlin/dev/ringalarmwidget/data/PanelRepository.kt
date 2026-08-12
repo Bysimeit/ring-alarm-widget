@@ -29,11 +29,19 @@ class PanelRepository(context: Context) {
         mayRetry: Boolean = false,
         bypassZids: List<String> = emptyList(),
     ): PanelOutcome = container.panelGate.withLock {
-        val outcome = withLocation { token, locationId ->
+        val attempted = withLocation { token, locationId ->
             container.panel().setMode(token, locationId, mode, bypassZids)
         }
+        val outcome = if (attempted.isTransient) confirm(mode, attempted) else attempted
         recordChange(outcome, retrying = mayRetry && outcome.isTransient)
         outcome
+    }
+
+    private suspend fun confirm(mode: AlarmMode, attempted: PanelOutcome): PanelOutcome {
+        val observed = withLocation { token, locationId ->
+            container.panel().readMode(token, locationId)
+        }
+        return observed.takeIf { it is PanelOutcome.Ready && it.snapshot.mode == mode } ?: attempted
     }
 
     suspend fun abandonChange() {
