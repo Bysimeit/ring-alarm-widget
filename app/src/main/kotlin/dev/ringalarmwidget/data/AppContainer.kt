@@ -9,19 +9,34 @@ import dev.ringalarmwidget.core.panel.PanelClient
 import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.security.Security
 
 fun nowEpochSeconds(): Long = System.currentTimeMillis() / 1000
 
 class AppContainer private constructor(context: Context) {
 
+    init {
+        Security.setProperty("networkaddress.cache.negative.ttl", "0")
+        Security.setProperty("networkaddress.cache.ttl", "30")
+    }
+
     val store = AndroidTokenStore(context)
 
     val panelGate = Mutex()
 
-    private val http = ringHttpClient(OkHttp.create())
+    @Volatile
+    private var http = ringHttpClient(OkHttp.create())
     private val mutex = Mutex()
 
     private var manager: SessionManager? = null
+
+    suspend fun renewTransport(): Unit = mutex.withLock {
+        val stale = http
+        http = ringHttpClient(OkHttp.create())
+        manager = null
+        runCatching { stale.close() }
+        Unit
+    }
 
     suspend fun auth(): AuthClient = AuthClient(http, store.hardwareId(), ::nowEpochSeconds)
 
