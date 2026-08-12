@@ -131,7 +131,6 @@ private fun Body(
             else -> Modes(
                 skin = skin,
                 shown = shown,
-                locked = pending != null,
                 note = if (compact) noteOf(pending != null, refreshing, failed) else null,
                 countdown = if (compact) transitionEndsAt else null,
                 compact = compact,
@@ -288,7 +287,6 @@ private fun Header(
 private fun Modes(
     skin: Skin,
     shown: AlarmMode?,
-    locked: Boolean,
     note: Int?,
     countdown: Long?,
     compact: Boolean,
@@ -300,7 +298,6 @@ private fun Modes(
                 skin = skin,
                 mode = mode,
                 active = shown == mode,
-                locked = locked,
                 note = note,
                 countdown = countdown,
                 compact = compact,
@@ -315,7 +312,6 @@ private fun ModeCell(
     skin: Skin,
     mode: AlarmMode,
     active: Boolean,
-    locked: Boolean,
     note: Int?,
     countdown: Long?,
     compact: Boolean,
@@ -324,8 +320,6 @@ private fun ModeCell(
     val context = LocalContext.current
     val filled = modifier.background(ImageProvider(pillOf(skin, mode, active)))
     val cell = when {
-        locked -> filled
-
         !active -> filled.clickable(
             actionRunCallback<SetModeAction>(actionParametersOf(ModeKey to mode.name))
         )
