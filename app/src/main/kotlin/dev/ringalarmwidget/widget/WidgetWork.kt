@@ -2,6 +2,8 @@ package dev.ringalarmwidget.widget
 
 import android.content.Context
 import android.os.Build
+import android.os.SystemClock
+import android.util.Log
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -16,6 +18,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import dev.ringalarmwidget.core.panel.AlarmMode
+import dev.ringalarmwidget.core.panel.PanelResult
 import dev.ringalarmwidget.data.PanelOutcome
 import dev.ringalarmwidget.data.PanelRepository
 import java.util.concurrent.TimeUnit
@@ -28,7 +31,9 @@ class PanelWorker(context: Context, parameters: WorkerParameters) :
         val asked = inputData.getString(DATA_MODE)
             ?.let { name -> AlarmMode.entries.firstOrNull { it.name == name } }
 
-        if (asked != null && System.currentTimeMillis() - inputData.getLong(DATA_ASKED_AT, 0) >= REQUEST_TTL_MILLIS) {
+        val askedAt = inputData.getLong(DATA_ASKED_AT, 0)
+        if (asked != null && System.currentTimeMillis() - askedAt >= REQUEST_TTL_MILLIS) {
+            Log.i(LOG_TAG, "${asked.name} attempt=$runAttemptCount abandoned age=${System.currentTimeMillis() - askedAt}ms")
             repository.abandonChange()
             updateWidgets(applicationContext)
             return Result.success()
@@ -36,11 +41,18 @@ class PanelWorker(context: Context, parameters: WorkerParameters) :
 
         val mayRetry = asked != null && runAttemptCount < MAX_ATTEMPTS
         val bypass = inputData.getStringArray(DATA_BYPASS)?.toList().orEmpty()
+        val startedAt = SystemClock.elapsedRealtime()
         val outcome = if (asked == null) {
             repository.read()
         } else {
             repository.set(asked, mayRetry, bypass)
         }
+
+        Log.i(
+            LOG_TAG,
+            "${asked?.name ?: "READ"} attempt=$runAttemptCount " +
+                "${SystemClock.elapsedRealtime() - startedAt}ms ${describe(outcome)}",
+        )
 
         updateWidgets(applicationContext)
 
@@ -58,6 +70,26 @@ class PanelWorker(context: Context, parameters: WorkerParameters) :
         const val DATA_BYPASS = "bypass"
         const val REQUEST_TTL_MILLIS = 120_000L
         const val MAX_ATTEMPTS = 3
+        const val LOG_TAG = "RingAlarmWidget"
+
+        private fun describe(outcome: PanelOutcome): String = when (outcome) {
+            is PanelOutcome.Ready -> "ready mode=${outcome.snapshot.mode?.name}"
+            PanelOutcome.SignedOut -> "signed-out"
+            PanelOutcome.NoLocation -> "no-location"
+            is PanelOutcome.Unavailable -> "unavailable cause=${outcome.cause}"
+            is PanelOutcome.NeedsBypass -> "bypass-required requested=${outcome.requested.name}"
+            is PanelOutcome.Failed -> "failed ${describe(outcome.result)}"
+        }
+
+        private fun describe(result: PanelResult): String = when (result) {
+            is PanelResult.Ready -> "ready"
+            PanelResult.NoSecurityPanel -> "no-security-panel"
+            PanelResult.NoUsableAsset -> "no-usable-asset"
+            is PanelResult.Rejected -> "rejected observed=${result.observed?.name}"
+            is PanelResult.BypassRequired -> "bypass-required"
+            is PanelResult.TimedOut -> "timed-out stage=${result.stage}"
+            is PanelResult.Unreachable -> "unreachable status=${result.statusCode} ${result.diagnostic}"
+        }
     }
 }
 
@@ -89,7 +121,7 @@ object WidgetWork {
         WorkManager.getInstance(context).enqueueUniqueWork(
             REFRESH,
             ExistingWorkPolicy.KEEP,
-            request(Data.EMPTY, urgent = false),
+            request(Data.EMPTY, urgent = true),
         )
     }
 
