@@ -33,7 +33,8 @@ class ModeWidgetReceiver : GlanceAppWidgetReceiver() {
 
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
-        WidgetWork.start(context)
+        WidgetWork.rearm(context)
+        WidgetWork.refresh(context)
     }
 
     override fun onUpdate(
@@ -57,7 +58,8 @@ class StatusWidgetReceiver : GlanceAppWidgetReceiver() {
 
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
-        WidgetWork.start(context)
+        WidgetWork.rearm(context)
+        WidgetWork.refresh(context)
     }
 
     override fun onUpdate(

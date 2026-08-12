@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (anyWidgetPlaced(this)) WidgetWork.schedule(this)
+        if (anyWidgetPlaced(this)) WidgetWork.rearm(this)
         setContent { AppRoot(this, viewModel) }
     }
 

@@ -21,12 +21,22 @@ import dev.ringalarmwidget.core.panel.AlarmMode
 import dev.ringalarmwidget.core.panel.PanelResult
 import dev.ringalarmwidget.data.PanelOutcome
 import dev.ringalarmwidget.data.PanelRepository
+import kotlinx.coroutines.CancellationException
 import java.util.concurrent.TimeUnit
 
 class PanelWorker(context: Context, parameters: WorkerParameters) :
     CoroutineWorker(context, parameters) {
 
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result = try {
+        attempt()
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (failure: Exception) {
+        Log.w(LOG_TAG, "worker threw, reporting success to keep the schedule alive", failure)
+        Result.success()
+    }
+
+    private suspend fun attempt(): Result {
         val repository = PanelRepository(applicationContext)
         val asked = inputData.getString(DATA_MODE)
             ?.let { name -> AlarmMode.entries.firstOrNull { it.name == name } }
@@ -104,14 +114,26 @@ object WidgetWork {
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             PERIODIC,
             ExistingPeriodicWorkPolicy.UPDATE,
-            PeriodicWorkRequestBuilder<PanelWorker>(
-                REFRESH_MINUTES, TimeUnit.MINUTES,
-                FLEX_MINUTES, TimeUnit.MINUTES,
-            )
-                .setConstraints(connected())
-                .build(),
+            periodic(),
         )
     }
+
+    fun rearm(context: Context) {
+        val manager = WorkManager.getInstance(context)
+        manager.cancelUniqueWork(PERIODIC)
+        manager.enqueueUniquePeriodicWork(
+            PERIODIC,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodic(),
+        )
+    }
+
+    private fun periodic() = PeriodicWorkRequestBuilder<PanelWorker>(
+        REFRESH_MINUTES, TimeUnit.MINUTES,
+        FLEX_MINUTES, TimeUnit.MINUTES,
+    )
+        .setConstraints(connected())
+        .build()
 
     fun stop(context: Context) {
         WorkManager.getInstance(context).cancelUniqueWork(PERIODIC)
