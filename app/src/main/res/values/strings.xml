@@ -50,6 +50,8 @@
     <string name="widget_label_status">Alarm status</string>
     <string name="widget_sign_in">Tap to sign in</string>
     <string name="widget_failed">Attempt failed</string>
+    <string name="widget_state_refreshing">Reading…</string>
+    <string name="widget_state_stale">Possibly out of date</string>
 
     <string name="disarm_confirm_title">Disarm the alarm?</string>
     <string name="disarm_confirm_subtitle">Confirm your identity to disarm.</string>
@@ -65,6 +67,10 @@
     <string name="settings_confirm_disarm_title">Confirm before disarming</string>
     <string name="settings_confirm_disarm_subtitle">Ask for your fingerprint, face or screen lock before switching the alarm off.</string>
     <string name="settings_confirm_disarm_unavailable">This device has no screen lock set up, so nothing can be asked for.</string>
+    <string name="settings_background_title">Background refresh</string>
+    <string name="settings_background_subtitle">Android throttles apps you rarely open, which can freeze the widget for hours. Exempting this app keeps its alarm state current.</string>
+    <string name="settings_background_action">Allow</string>
+    <string name="settings_background_granted">Allowed</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_app">Application</string>
     <string name="settings_appearance_widget">Home screen widget</string>

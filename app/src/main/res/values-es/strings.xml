@@ -52,6 +52,8 @@
     <string name="widget_label_status">Estado de la alarma</string>
     <string name="widget_sign_in">Toque para iniciar sesión</string>
     <string name="widget_failed">Intento fallido</string>
+    <string name="widget_state_refreshing">Leyendo…</string>
+    <string name="widget_state_stale">Quizá desactualizado</string>
 
     <string name="disarm_confirm_title">¿Desarmar la alarma?</string>
     <string name="disarm_confirm_subtitle">Confirma tu identidad para desarmar.</string>
@@ -67,6 +69,10 @@
     <string name="settings_confirm_disarm_title">Confirmar antes de desarmar</string>
     <string name="settings_confirm_disarm_subtitle">Pedir tu huella, tu cara o el bloqueo de pantalla antes de apagar la alarma.</string>
     <string name="settings_confirm_disarm_unavailable">Este dispositivo no tiene bloqueo de pantalla, así que no se puede pedir nada.</string>
+    <string name="settings_background_title">Actualización en segundo plano</string>
+    <string name="settings_background_subtitle">Android limita las aplicaciones que abre pocas veces, lo que puede congelar el widget durante horas. Eximir esta aplicación mantiene al día el estado de la alarma.</string>
+    <string name="settings_background_action">Permitir</string>
+    <string name="settings_background_granted">Permitida</string>
     <string name="settings_appearance_title">Apariencia</string>
     <string name="settings_appearance_app">Aplicación</string>
     <string name="settings_appearance_widget">Widget de la pantalla de inicio</string>

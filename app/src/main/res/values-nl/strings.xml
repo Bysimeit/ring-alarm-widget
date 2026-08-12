@@ -49,6 +49,8 @@
     <string name="widget_label_status">Alarmstatus</string>
     <string name="widget_sign_in">Tik om aan te melden</string>
     <string name="widget_failed">Poging mislukt</string>
+    <string name="widget_state_refreshing">Lezen…</string>
+    <string name="widget_state_stale">Mogelijk verouderd</string>
 
     <string name="disarm_confirm_title">Alarm uitschakelen?</string>
     <string name="disarm_confirm_subtitle">Bevestig je identiteit om uit te schakelen.</string>
@@ -64,6 +66,10 @@
     <string name="settings_confirm_disarm_title">Bevestigen voor uitschakelen</string>
     <string name="settings_confirm_disarm_subtitle">Vraag om je vingerafdruk, gezicht of schermvergrendeling voordat het alarm wordt uitgeschakeld.</string>
     <string name="settings_confirm_disarm_unavailable">Dit toestel heeft geen schermvergrendeling, dus er kan niets gevraagd worden.</string>
+    <string name="settings_background_title">Vernieuwen op de achtergrond</string>
+    <string name="settings_background_subtitle">Android knijpt apps af die u zelden opent, waardoor de widget uren kan blijven hangen. Deze app uitzonderen houdt de alarmstatus actueel.</string>
+    <string name="settings_background_action">Toestaan</string>
+    <string name="settings_background_granted">Toegestaan</string>
     <string name="settings_appearance_title">Weergave</string>
     <string name="settings_appearance_app">App</string>
     <string name="settings_appearance_widget">Widget op het startscherm</string>
