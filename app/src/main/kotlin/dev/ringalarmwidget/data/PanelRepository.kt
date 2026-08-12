@@ -17,19 +17,34 @@ class PanelRepository(context: Context) {
     val store: AndroidTokenStore get() = container.store
 
     suspend fun read(): PanelOutcome = container.panelGate.withLock {
-        val outcome = withLocation { token, locationId ->
+        val outcome = retryingOnUnreachable { token, locationId ->
             container.panel().readMode(token, locationId)
         }
         recordRead(outcome)
         outcome
     }
 
+    private suspend fun retryingOnUnreachable(
+        block: suspend (String, String) -> PanelResult,
+    ): PanelOutcome {
+        val outcome = withLocation(block)
+        if (!outcome.unresolved) return outcome
+
+        container.renewTransport()
+        return withLocation(block)
+    }
+
+    private val PanelOutcome.unresolved: Boolean
+        get() = this is PanelOutcome.Failed &&
+            result is PanelResult.Unreachable &&
+            (result as PanelResult.Unreachable).statusCode == null
+
     suspend fun set(
         mode: AlarmMode,
         mayRetry: Boolean = false,
         bypassZids: List<String> = emptyList(),
     ): PanelOutcome = container.panelGate.withLock {
-        val attempted = withLocation { token, locationId ->
+        val attempted = retryingOnUnreachable { token, locationId ->
             container.panel().setMode(token, locationId, mode, bypassZids)
         }
         val outcome = if (attempted.isTransient) confirm(mode, attempted) else attempted
