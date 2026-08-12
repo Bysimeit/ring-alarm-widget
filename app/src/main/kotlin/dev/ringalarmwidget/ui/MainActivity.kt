@@ -1,7 +1,14 @@
 package dev.ringalarmwidget.ui
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -48,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -681,6 +689,8 @@ private fun SettingsScreen(
             }
         }
 
+        BackgroundRefreshCard()
+
         Card {
             Text(
                 stringResource(R.string.settings_appearance_title),
@@ -723,6 +733,57 @@ private fun SettingsScreen(
         Disclaimer()
     }
 }
+
+@Composable
+private fun BackgroundRefreshCard() {
+    val context = LocalContext.current
+    var exempt by remember { mutableStateOf(context.ignoresBatteryOptimizations()) }
+
+    val request = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        exempt = context.ignoresBatteryOptimizations()
+    }
+
+    Card {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.settings_background_title),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Text(
+                    stringResource(R.string.settings_background_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+
+            if (exempt) {
+                Text(
+                    stringResource(R.string.settings_background_granted),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            } else {
+                TextButton(
+                    onClick = {
+                        request.launch(
+                            Intent(
+                                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                                Uri.fromParts("package", context.packageName, null),
+                            )
+                        )
+                    }
+                ) {
+                    Text(stringResource(R.string.settings_background_action))
+                }
+            }
+        }
+    }
+}
+
+private fun Context.ignoresBatteryOptimizations(): Boolean =
+    getSystemService(PowerManager::class.java)?.isIgnoringBatteryOptimizations(packageName) ?: false
 
 @Composable
 private fun PrimaryButton(

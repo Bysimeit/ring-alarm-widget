@@ -39,12 +39,14 @@ class PanelRepository(context: Context) {
     suspend fun abandonChange() {
         store.setPendingMode(null)
         store.setBypassPrompt(null)
+        store.setRefreshing(false)
         store.setLastAttemptFailed(true)
     }
 
     suspend fun dismissBypass() {
         store.setBypassPrompt(null)
         store.setPendingMode(null)
+        store.setRefreshing(false)
         store.setLastAttemptFailed(false)
     }
 
@@ -97,6 +99,7 @@ class PanelRepository(context: Context) {
     }
 
     private suspend fun recordRead(outcome: PanelOutcome) {
+        store.setRefreshing(false)
         if (outcome !is PanelOutcome.Ready) return
         store.setLastAttemptFailed(false)
         cache(outcome.snapshot)
@@ -104,6 +107,7 @@ class PanelRepository(context: Context) {
 
     private suspend fun recordChange(outcome: PanelOutcome, retrying: Boolean) {
         if (retrying) return
+        store.setRefreshing(false)
 
         if (outcome is PanelOutcome.NeedsBypass) {
             store.setPendingMode(null)
@@ -123,6 +127,7 @@ class PanelRepository(context: Context) {
     private suspend fun cache(snapshot: PanelSnapshot) {
         store.setCachedMode(snapshot.mode)
         store.setTransitionEndsAt(snapshot.transitionEndsAtEpochMillis)
+        store.setReadAt(System.currentTimeMillis())
     }
 
     private fun warrantsDiscovery(result: PanelResult): Boolean = when (result) {

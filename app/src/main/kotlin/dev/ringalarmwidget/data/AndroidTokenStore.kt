@@ -52,6 +52,8 @@ class AndroidTokenStore(context: Context) : TokenStore {
             it.remove(KEY_FAILED)
             it.remove(KEY_TRANSITION)
             it.remove(KEY_BYPASS)
+            it.remove(KEY_REFRESHING)
+            it.remove(KEY_READ_AT)
         }
     }
 
@@ -108,6 +110,23 @@ class AndroidTokenStore(context: Context) : TokenStore {
         store.edit { if (failed) it[KEY_FAILED] = true else it.remove(KEY_FAILED) }
     }
 
+    suspend fun setRefreshing(refreshing: Boolean) {
+        if (!refreshing && store.data.first()[KEY_REFRESHING] == null) return
+        store.edit {
+            if (refreshing) {
+                it[KEY_REFRESHING] = System.currentTimeMillis()
+            } else {
+                it.remove(KEY_REFRESHING)
+            }
+        }
+    }
+
+    suspend fun setReadAt(readAt: Long) {
+        store.edit { it[KEY_READ_AT] = readAt }
+    }
+
+    suspend fun readAt(): Long? = store.data.first()[KEY_READ_AT]
+
     suspend fun bypassPrompt(): BypassPrompt? = livePrompt(store.data.first()[KEY_BYPASS])
 
     suspend fun setBypassPrompt(prompt: BypassPrompt?) {
@@ -134,11 +153,16 @@ class AndroidTokenStore(context: Context) : TokenStore {
     }
 
     fun widgetSnapshots(): Flow<WidgetSnapshot> = store.data.map { preferences ->
+        val mode = AlarmMode.fromWire(preferences[KEY_MODE]?.let { decrypt(it) })
+        val readAt = preferences[KEY_READ_AT]
+
         WidgetSnapshot(
             signedIn = preferences[KEY_SESSION] != null,
-            mode = AlarmMode.fromWire(preferences[KEY_MODE]?.let { decrypt(it) }),
+            mode = mode,
             pending = livePendingMode(preferences[KEY_PENDING]),
+            refreshing = liveRefreshing(preferences[KEY_REFRESHING]),
             failed = preferences[KEY_FAILED] ?: false,
+            stale = mode != null && System.currentTimeMillis() - (readAt ?: 0) > STALE_MILLIS,
             theme = ThemeChoice.fromStored(preferences[KEY_WIDGET_THEME]),
             transitionEndsAt = preferences[KEY_TRANSITION]?.takeIf { it > System.currentTimeMillis() },
             bypass = livePrompt(preferences[KEY_BYPASS]),
@@ -157,6 +181,9 @@ class AndroidTokenStore(context: Context) : TokenStore {
         if (System.currentTimeMillis() - prompt.requestedAtEpochMillis > BYPASS_TTL_MILLIS) return null
         return prompt.takeIf { it.requested != null }
     }
+
+    private fun liveRefreshing(startedAt: Long?): Boolean =
+        startedAt != null && System.currentTimeMillis() - startedAt <= REFRESHING_TTL_MILLIS
 
     private fun livePendingMode(payload: String?): AlarmMode? {
         val raw = payload?.let { decrypt(it) } ?: return null
@@ -222,6 +249,8 @@ class AndroidTokenStore(context: Context) : TokenStore {
         val KEY_WIDGET_THEME = stringPreferencesKey("widget_theme")
         val KEY_TRANSITION = longPreferencesKey("transition_ends_at")
         val KEY_BYPASS = stringPreferencesKey("bypass_prompt")
+        val KEY_REFRESHING = longPreferencesKey("refreshing_since")
+        val KEY_READ_AT = longPreferencesKey("read_at")
 
         const val ANDROID_KEYSTORE = "AndroidKeyStore"
         const val KEY_ALIAS = "session-key"
@@ -231,5 +260,7 @@ class AndroidTokenStore(context: Context) : TokenStore {
         const val SEPARATOR = "@"
         const val PENDING_TTL_MILLIS = 150_000L
         const val BYPASS_TTL_MILLIS = 300_000L
+        const val REFRESHING_TTL_MILLIS = 90_000L
+        const val STALE_MILLIS = 2_700_000L
     }
 }

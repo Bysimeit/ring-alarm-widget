@@ -68,7 +68,9 @@ class ModeWidget : GlanceAppWidget() {
                 signedIn = snapshot.signedIn,
                 mode = snapshot.mode,
                 pending = snapshot.pending,
+                refreshing = snapshot.refreshing,
                 failed = snapshot.failed,
+                stale = snapshot.stale,
                 transitionEndsAt = snapshot.transitionEndsAt,
                 bypass = snapshot.bypass,
             )
@@ -82,7 +84,9 @@ private fun Body(
     signedIn: Boolean,
     mode: AlarmMode?,
     pending: AlarmMode?,
+    refreshing: Boolean,
     failed: Boolean,
+    stale: Boolean,
     transitionEndsAt: Long?,
     bypass: BypassPrompt?,
 ) {
@@ -102,8 +106,7 @@ private fun Body(
                 Header(
                     skin = skin,
                     shown = shown,
-                    pending = pending != null,
-                    failed = failed,
+                    note = headerNoteOf(pending != null, refreshing, failed, stale),
                     transitionEndsAt = transitionEndsAt,
                 )
             }
@@ -129,7 +132,7 @@ private fun Body(
                 skin = skin,
                 shown = shown,
                 locked = pending != null,
-                note = if (compact) noteOf(pending != null, failed) else null,
+                note = if (compact) noteOf(pending != null, refreshing, failed) else null,
                 countdown = if (compact) transitionEndsAt else null,
                 compact = compact,
             )
@@ -244,8 +247,7 @@ private fun sensorSummary(context: Context, prompt: BypassPrompt): String {
 private fun Header(
     skin: Skin,
     shown: AlarmMode?,
-    pending: Boolean,
-    failed: Boolean,
+    note: Int?,
     transitionEndsAt: Long?,
 ) {
     val context = LocalContext.current
@@ -262,9 +264,9 @@ private fun Header(
             )
             if (transitionEndsAt != null) {
                 Countdown(endsAt = transitionEndsAt, colorArgb = skin.mutedArgb)
-            } else if (pending || failed) {
+            } else if (note != null) {
                 Text(
-                    text = context.getString(if (pending) R.string.widget_state_pending else R.string.widget_failed),
+                    text = context.getString(note),
                     style = TextStyle(color = skin.muted, fontSize = 11.sp),
                     maxLines = 1,
                 )
@@ -376,8 +378,12 @@ private fun SignInHint(skin: Skin, compact: Boolean) {
     }
 }
 
-private fun noteOf(pending: Boolean, failed: Boolean): Int? = when {
+private fun noteOf(pending: Boolean, refreshing: Boolean, failed: Boolean): Int? = when {
     pending -> R.string.widget_state_pending
+    refreshing -> R.string.widget_state_refreshing
     failed -> R.string.widget_failed
     else -> null
 }
+
+private fun headerNoteOf(pending: Boolean, refreshing: Boolean, failed: Boolean, stale: Boolean): Int? =
+    noteOf(pending, refreshing, failed) ?: R.string.widget_state_stale.takeIf { stale }

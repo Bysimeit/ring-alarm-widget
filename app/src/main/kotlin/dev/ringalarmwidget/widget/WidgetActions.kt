@@ -98,7 +98,9 @@ class RefreshAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters,
     ) {
-        WidgetWork.refresh(context)
+        AppContainer.get(context).store.setRefreshing(true)
+        updateWidgets(context)
+        WidgetWork.refreshNow(context)
     }
 }
 

@@ -49,6 +49,8 @@
     <string name="widget_label_status">Alarmstatus</string>
     <string name="widget_sign_in">Zum Anmelden tippen</string>
     <string name="widget_failed">Versuch fehlgeschlagen</string>
+    <string name="widget_state_refreshing">Abfrage…</string>
+    <string name="widget_state_stale">Evtl. veraltet</string>
 
     <string name="disarm_confirm_title">Alarm deaktivieren?</string>
     <string name="disarm_confirm_subtitle">Bestätigen Sie Ihre Identität, um zu deaktivieren.</string>
@@ -64,6 +66,10 @@
     <string name="settings_confirm_disarm_title">Vor dem Deaktivieren bestätigen</string>
     <string name="settings_confirm_disarm_subtitle">Vor dem Ausschalten der Alarmanlage nach Fingerabdruck, Gesicht oder Displaysperre fragen.</string>
     <string name="settings_confirm_disarm_unavailable">Auf diesem Gerät ist keine Displaysperre eingerichtet, es kann also nichts abgefragt werden.</string>
+    <string name="settings_background_title">Aktualisierung im Hintergrund</string>
+    <string name="settings_background_subtitle">Android drosselt Apps, die Sie selten öffnen, wodurch das Widget stundenlang einfrieren kann. Eine Ausnahme für diese App hält den Alarmzustand aktuell.</string>
+    <string name="settings_background_action">Erlauben</string>
+    <string name="settings_background_granted">Erlaubt</string>
     <string name="settings_appearance_title">Darstellung</string>
     <string name="settings_appearance_app">Anwendung</string>
     <string name="settings_appearance_widget">Startbildschirm-Widget</string>

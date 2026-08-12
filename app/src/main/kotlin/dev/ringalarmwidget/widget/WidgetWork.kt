@@ -93,6 +93,14 @@ object WidgetWork {
         )
     }
 
+    fun refreshNow(context: Context) {
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            REFRESH,
+            ExistingWorkPolicy.REPLACE,
+            request(Data.EMPTY, urgent = true),
+        )
+    }
+
     fun settle(context: Context, transitionEndsAt: Long?) {
         val wait = (transitionEndsAt ?: return) + SETTLE_MILLIS - System.currentTimeMillis()
         if (wait <= 0) return
@@ -108,7 +116,11 @@ object WidgetWork {
     }
 
     fun apply(context: Context, mode: AlarmMode, bypassZids: List<String> = emptyList()) {
-        WorkManager.getInstance(context).enqueue(
+        val manager = WorkManager.getInstance(context)
+        manager.cancelUniqueWork(REFRESH)
+        manager.enqueueUniqueWork(
+            CHANGE,
+            ExistingWorkPolicy.REPLACE,
             request(
                 Data.Builder()
                     .putString(PanelWorker.DATA_MODE, mode.name)
@@ -116,7 +128,7 @@ object WidgetWork {
                     .putStringArray(PanelWorker.DATA_BYPASS, bypassZids.toTypedArray())
                     .build(),
                 urgent = true,
-            )
+            ),
         )
     }
 
@@ -138,6 +150,7 @@ object WidgetWork {
 
     private const val PERIODIC = "panel-refresh"
     private const val REFRESH = "panel-once"
+    private const val CHANGE = "panel-change"
     private const val SETTLE = "panel-settle"
     private const val SETTLE_MILLIS = 2_000L
     private const val REFRESH_MINUTES = 15L

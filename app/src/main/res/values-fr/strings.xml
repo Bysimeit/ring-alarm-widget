@@ -52,6 +52,8 @@
     <string name="widget_label_status">État de l\'alarme</string>
     <string name="widget_sign_in">Touchez pour vous connecter</string>
     <string name="widget_failed">Échec de la tentative</string>
+    <string name="widget_state_refreshing">Lecture…</string>
+    <string name="widget_state_stale">Peut-être périmé</string>
 
     <string name="disarm_confirm_title">Désarmer l\'alarme ?</string>
     <string name="disarm_confirm_subtitle">Confirmez votre identité pour désarmer.</string>
@@ -67,6 +69,10 @@
     <string name="settings_confirm_disarm_title">Confirmer avant de désarmer</string>
     <string name="settings_confirm_disarm_subtitle">Demander votre empreinte, votre visage ou le code de l\'écran avant de couper l\'alarme.</string>
     <string name="settings_confirm_disarm_unavailable">Aucun verrouillage d\'écran n\'est configuré sur cet appareil, rien ne peut donc être demandé.</string>
+    <string name="settings_background_title">Actualisation en arrière-plan</string>
+    <string name="settings_background_subtitle">Android bride les applications que vous ouvrez rarement, ce qui peut figer le widget pendant des heures. En exempter cette application garde l\'état de l\'alarme à jour.</string>
+    <string name="settings_background_action">Autoriser</string>
+    <string name="settings_background_granted">Autorisée</string>
     <string name="settings_appearance_title">Apparence</string>
     <string name="settings_appearance_app">Application</string>
     <string name="settings_appearance_widget">Widget de l\'écran d\'accueil</string>
