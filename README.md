@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android-3ddc84.svg)]()
 [![Built with](https://img.shields.io/badge/built%20with-Kotlin-7f52ff.svg)]()
-[![Release](https://img.shields.io/badge/release-v1.0.1-3ddc84.svg)](https://github.com/Bysimeit/ring-alarm-widget/releases/latest)
+[![Release](https://img.shields.io/badge/release-v1.0.2-3ddc84.svg)](https://github.com/Bysimeit/ring-alarm-widget/releases/latest)
 
 </div>
 
@@ -116,11 +116,17 @@ real and worth stating before you trust it with an alarm system.
   anyone holding your phone can disarm from the home screen. Optional biometric
   confirmation before disarming now exists, off by default, and the 1×1 tile
   cannot change the mode at all.
-- **The widget can show a stale mode.** It reads the panel every fifteen minutes
-  in the background, and every minute while the app is on screen. Change the mode
-  at the physical keypad and the widget will not notice straight away. Holding a
-  live connection is not an option today: Ring closes its websocket after about a
-  minute, measured and reproducible.
+- **The widget can show a stale mode.** Change the mode at the physical keypad
+  and the widget will not notice straight away. Your own taps are immediate, and
+  the app polls every minute while it is on screen, but the background refresh is
+  not a clock. Android schedules it with no deadline and is free to defer it for
+  as long as it likes: a poll asking for fifteen minutes was measured sitting
+  idle for eleven minutes past its turn, on an unrestricted phone. The dependable
+  path is the widget's own thirty-minute system alarm. **Settings offer to exempt
+  the app from battery optimisation**, and that is what decides whether the
+  background refresh happens at all. Holding a live connection instead is not an
+  option today: Ring closes its websocket after about a minute, measured and
+  reproducible.
 - **Automated access may sit awkwardly with Ring's terms of service.** Personal
   use, no monetisation, no data collection, but you should know it rather than
   find out later.
